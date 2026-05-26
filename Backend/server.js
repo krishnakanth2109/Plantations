@@ -20,7 +20,7 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 5000;
-const allowedOrigins = (process.env.CLIENT_ORIGIN || "https://plantation-yogini.netlify.app" || "https://plantations.onrender.com/")
+const allowedOrigins = (process.env.CLIENT_ORIGIN || "http://localhost:5173,https://plantation-yogini.netlify.app,https://plantations.onrender.com")
   .replace(/['"]/g, "")
   .split(",")
   .map((origin) => origin.trim().replace(/\/$/, ""))
