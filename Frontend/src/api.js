@@ -75,7 +75,7 @@ const updatePaymentStatus = async (id, status) => (await api.patch(`/api/payment
 const createWellnessTicket = async (data) => (await api.post("/api/wellness-tickets", data)).data;
 const getMyWellnessTickets = async () => (await api.get("/api/wellness-tickets/my")).data;
 const getAllWellnessTickets = async () => (await api.get("/api/wellness-tickets")).data;
-const diagnoseWellnessTicket = async (id, diagnosis) => (await api.patch(`/api/wellness-tickets/${id}/diagnose`, { diagnosis })).data;
+const diagnoseWellnessTicket = async (id, diagnosis) => (await api.post(`/api/wellness-tickets/${id}/diagnose`, { diagnosis })).data;
 const resolveWellnessTicket = async (id) => (await api.patch(`/api/wellness-tickets/${id}/resolve`)).data;
 const getLibraryArticles = async () => (await api.get("/api/library")).data;
 const getLibraryArticleBySlug = async (slug) => (await api.get(`/api/library/${slug}`)).data;
@@ -103,6 +103,10 @@ const uploadFile = async (file, folder) => {
   });
   return response.data;
 };
+const getCustomers = async () => (await api.get("/api/customers")).data;
+const createCustomer = async (data) => (await api.post("/api/customers", data)).data;
+const updateCustomer = async (id, data) => (await api.put(`/api/customers/${id}`, data)).data;
+const deleteCustomer = async (id) => (await api.delete(`/api/customers/${id}`)).data;
 var stdin_default = api;
 export {
   addWishlistItem,
@@ -156,5 +160,9 @@ export {
   updatePaymentStatus,
   updateService,
   updateSubscriptionStatus,
-  uploadFile
+  uploadFile,
+  getCustomers,
+  createCustomer,
+  updateCustomer,
+  deleteCustomer
 };

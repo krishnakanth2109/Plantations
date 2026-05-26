@@ -1,8 +1,13 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 const PREFIX = "yp_store_";
+const memoryCache = new Map();
+
 function read(key, fallback) {
   if (typeof window === "undefined") return fallback;
   try {
+    if (memoryCache.has(key)) {
+      return memoryCache.get(key);
+    }
     const raw = sessionStorage.getItem(PREFIX + key);
     return raw ? JSON.parse(raw) : fallback;
   } catch {
@@ -11,7 +16,12 @@ function read(key, fallback) {
 }
 function write(key, value) {
   if (typeof window === "undefined") return;
-  sessionStorage.setItem(PREFIX + key, JSON.stringify(value));
+  try {
+    sessionStorage.setItem(PREFIX + key, JSON.stringify(value));
+  } catch (err) {
+    console.warn(`[store] Storage quota exceeded or disabled for key "${key}". Falling back to in-memory store.`, err);
+  }
+  memoryCache.set(key, value);
   window.dispatchEvent(new CustomEvent("yp-store-change", { detail: key }));
 }
 function useStore(key, initial) {

@@ -14,6 +14,7 @@ import serviceRoutes from "./routes/serviceRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import wellnessRoutes from "./routes/wellnessRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
+import customerRoutes from "./routes/customerRoutes.js";
 
 dotenv.config();
 
@@ -58,6 +59,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/seed", seedRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/customers", customerRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });

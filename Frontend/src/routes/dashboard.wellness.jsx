@@ -22,20 +22,20 @@ function Page() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    let active = true;
+  async function fetchTickets() {
     setLoading(true);
-    getMyWellnessTickets()
-      .then((data) => {
-        if (active) setItems(data.tickets.map(mapTicket));
-      })
-      .catch((error) => toast.error(error.message))
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+    try {
+      const data = await getMyWellnessTickets();
+      setItems(data.tickets.map(mapTicket));
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchTickets();
   }, []);
 
   async function raise() {

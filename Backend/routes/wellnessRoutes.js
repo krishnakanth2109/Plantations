@@ -59,6 +59,20 @@ router.patch("/:id/diagnose", requireAuth, requireAdmin, async (req, res, next) 
   }
 });
 
+router.post("/:id/diagnose", requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const ticket = await Ticket.findByIdAndUpdate(
+      req.params.id,
+      { diagnosis: req.body.diagnosis, status: "Diagnosed" },
+      { new: true, runValidators: true },
+    ).populate(ticketPopulate);
+    if (!ticket) return res.status(404).json({ message: "Wellness ticket not found" });
+    return res.json({ ticket });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.patch("/:id/resolve", requireAuth, requireAdmin, async (req, res, next) => {
   try {
     const ticket = await Ticket.findByIdAndUpdate(

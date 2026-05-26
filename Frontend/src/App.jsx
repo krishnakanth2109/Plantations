@@ -1,6 +1,7 @@
 import React from "react";
 import { Toaster } from "./components/ui/sonner";
-import { Router, WithOutlet, useLocation } from "./lib/router";
+import { Router } from "./lib/router";
+import { Routes, Route } from "react-router-dom";
 
 import { Route as HomeRoute } from "./routes/index";
 import { Route as AboutRoute } from "./routes/about";
@@ -51,6 +52,7 @@ import { Route as AdminStaffRoute } from "./routes/admin.staff";
 import { Route as AdminSubscriptionsRoute } from "./routes/admin.subscriptions";
 import { Route as AdminTestimonialsRoute } from "./routes/admin.testimonials";
 import { Route as AdminWellnessRoute } from "./routes/admin.wellness";
+import { Route as AdminMaintenancePlansRoute } from "./routes/admin.maintenance-plans";
 
 const publicRoutes = [
   HomeRoute,
@@ -104,20 +106,8 @@ const adminRoutes = [
   AdminSubscriptionsRoute,
   AdminTestimonialsRoute,
   AdminWellnessRoute,
+  AdminMaintenancePlansRoute,
 ];
-
-function normalizePath(path) {
-  return path.length > 1 ? path.replace(/\/+$/, "") : path;
-}
-
-function renderRoute(route) {
-  const Component = route.component;
-  return Component ? <Component /> : null;
-}
-
-function matchRoute(routes, pathname) {
-  return routes.find((route) => normalizePath(route.path) === pathname);
-}
 
 function NotFound() {
   return (
@@ -133,27 +123,37 @@ function NotFound() {
   );
 }
 
-function AppRoutes() {
-  const { pathname } = useLocation();
-
-  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
-    const childRoute = matchRoute(dashboardRoutes, pathname) || DashboardIndexRoute;
-    return <WithOutlet outlet={renderRoute(childRoute)}>{renderRoute(DashboardRoute)}</WithOutlet>;
-  }
-
-  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    const childRoute = matchRoute(adminRoutes, pathname) || AdminIndexRoute;
-    return <WithOutlet outlet={renderRoute(childRoute)}>{renderRoute(AdminRoute)}</WithOutlet>;
-  }
-
-  const route = matchRoute(publicRoutes, pathname);
-  return route ? renderRoute(route) : <NotFound />;
-}
-
 function App() {
   return (
     <Router>
-      <AppRoutes />
+      <Routes>
+        {/* Public Routes */}
+        {publicRoutes.map((route) => {
+          const Component = route.component;
+          return <Route key={route.path} path={route.path} element={<Component />} />;
+        })}
+
+        {/* Dashboard Routes (Nested) */}
+        <Route path="/dashboard" element={<DashboardRoute.component />}>
+          <Route index element={<DashboardIndexRoute.component />} />
+          {dashboardRoutes.filter(r => r.path !== "/dashboard").map((route) => {
+            const Component = route.component;
+            return <Route key={route.path} path={route.path} element={<Component />} />;
+          })}
+        </Route>
+
+        {/* Admin Routes (Nested) */}
+        <Route path="/admin" element={<AdminRoute.component />}>
+          <Route index element={<AdminIndexRoute.component />} />
+          {adminRoutes.filter(r => r.path !== "/admin").map((route) => {
+            const Component = route.component;
+            return <Route key={route.path} path={route.path} element={<Component />} />;
+          })}
+        </Route>
+
+        {/* 404 Route */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
       <Toaster richColors position="top-right" />
     </Router>
   );
