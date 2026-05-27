@@ -10,7 +10,7 @@ export async function requireAuth(req, res, next) {
       return res.status(401).json({ message: "Firebase ID token is required" });
     }
 
-    const decoded = await firebaseAdmin.auth().verifyIdToken(token);
+    const decoded = await firebaseAdmin.auth().verifySessionCookie(token);
     const email = decoded.email?.toLowerCase();
     const user = await User.findOne({
       $or: [

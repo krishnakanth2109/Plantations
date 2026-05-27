@@ -80,13 +80,21 @@ async function findOrCreateMongoUser(firebaseUser, defaults = {}) {
   return user;
 }
 
-function sendAuth(res, user, firebaseSession, status = 200) {
-  return res.status(status).json({
-    token: firebaseSession.idToken,
-    refreshToken: firebaseSession.refreshToken,
-    expiresIn: firebaseSession.expiresIn,
-    user: user.toAuthJSON(),
-  });
+async function sendAuth(res, user, firebaseSession, status = 200) {
+  try {
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const sessionCookie = await firebaseAdmin.auth().createSessionCookie(firebaseSession.idToken, {
+      expiresIn: threeDaysMs,
+    });
+    return res.status(status).json({
+      token: sessionCookie,
+      refreshToken: firebaseSession.refreshToken,
+      expiresIn: 3 * 24 * 3600,
+      user: user.toAuthJSON(),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to generate session cookie: " + error.message });
+  }
 }
 
 export async function register(req, res, next) {
@@ -132,7 +140,7 @@ export async function register(req, res, next) {
     });
 
     const firebaseSession = await signInWithPassword(normalizedEmail, password);
-    return sendAuth(res, user, firebaseSession, 201);
+    return await sendAuth(res, user, firebaseSession, 201);
   } catch (error) {
     next(error);
   }
@@ -151,7 +159,7 @@ export async function login(req, res, next) {
     const firebaseUser = await firebaseAdmin.auth().getUser(firebaseSession.localId);
     const user = await findOrCreateMongoUser(firebaseUser);
 
-    return sendAuth(res, user, firebaseSession);
+    return await sendAuth(res, user, firebaseSession);
   } catch (error) {
     next(error);
   }

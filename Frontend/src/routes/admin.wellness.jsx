@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { createFileRoute } from "../lib/router";
 import { PageHeader, Badge, statusTone } from "../components/dashboard/DashboardShell";
-import { diagnoseWellnessTicket, getAllWellnessTickets, resolveWellnessTicket } from "../api";
+import { diagnoseWellnessTicket, getAllWellnessTickets, resolveWellnessTicket, deleteWellnessTicket } from "../api";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const Route = createFileRoute("/admin/wellness")({ component: Page });
@@ -21,6 +22,17 @@ function Page() {
   const [items, setItems] = useState([]);
   const [diag, setDiag] = useState({});
   const [loading, setLoading] = useState(false);
+
+  async function handleDelete(id) {
+    if (!confirm("Are you sure you want to delete this wellness ticket as an admin?")) return;
+    try {
+      await deleteWellnessTicket(id);
+      setItems((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Ticket deleted");
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -74,7 +86,16 @@ function Page() {
                 <div className="text-xs text-muted-foreground">{t.created} - {t.customer}</div>
                 <h3 className="mt-1 font-display text-lg">{t.issue}</h3>
               </div>
-              <Badge tone={statusTone(t.status)}>{t.status}</Badge>
+              <div className="flex items-center gap-3">
+                <Badge tone={statusTone(t.status)}>{t.status}</Badge>
+                <button
+                  onClick={() => handleDelete(t.id)}
+                  className="rounded-full p-1.5 hover:bg-secondary text-rose-600 transition"
+                  aria-label="Delete ticket"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
             {t.diagnosis && <p className="mt-3 rounded-lg bg-secondary/60 p-3 text-sm"><strong>Diagnosis:</strong> {t.diagnosis}</p>}
             {t.status !== "Resolved" && (

@@ -15,6 +15,7 @@ import uploadRoutes from "./routes/uploadRoutes.js";
 import wellnessRoutes from "./routes/wellnessRoutes.js";
 import wishlistRoutes from "./routes/wishlistRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 
 dotenv.config();
 
@@ -60,6 +61,7 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/seed", seedRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
@@ -73,9 +75,15 @@ app.use((error, _req, res, _next) => {
   });
 });
 
+import { createServer } from "http";
+import { initSocket } from "./config/socket.js";
+
 connectDB()
   .then(() => {
-    app.listen(port, () => {
+    const httpServer = createServer(app);
+    initSocket(httpServer, allowedOrigins);
+    
+    httpServer.listen(port, () => {
       console.log(`API server listening on http://localhost:${port}`);
     });
   })
@@ -83,3 +91,4 @@ connectDB()
     console.error("Failed to start API server:", error.message);
     process.exit(1);
   });
+

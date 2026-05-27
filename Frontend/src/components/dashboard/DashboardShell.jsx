@@ -5,14 +5,31 @@ import { useAuth, logout } from "../../lib/auth";
 import { seedIfEmpty } from "../../lib/seed";
 import logo from "../../assets/logo.png";
 import { LogOut, Menu, X, Bell } from "lucide-react";
+import { useSocket } from "../../hooks/useSocket";
+import { getUnreadNotificationCount } from "../../api";
+
 function DashboardShell({ role, nav, title }) {
   const { user, ready } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
   useEffect(() => {
     seedIfEmpty();
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    getUnreadNotificationCount()
+      .then((data) => setUnreadCount(data.count))
+      .catch((err) => console.error("Error fetching unread count:", err));
+  }, [user]);
+
+  useSocket((notif) => {
+    setUnreadCount((prev) => prev + 1);
+  });
+
   useEffect(() => {
     if (!ready) return;
     if (!user) {
@@ -23,6 +40,7 @@ function DashboardShell({ role, nav, title }) {
       navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
     }
   }, [user, ready, role, navigate]);
+
   if (!ready || !user || user.role !== role) {
     return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
   }
@@ -75,6 +93,11 @@ function DashboardShell({ role, nav, title }) {
         <div className="flex items-center gap-3">
           <Link to={role === "admin" ? "/admin/notifications" : "/dashboard/notifications"} className="relative rounded-full border border-border bg-card p-2 hover:bg-secondary">
             <Bell className="h-4 w-4" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
+                {unreadCount}
+              </span>
+            )}
           </Link>
           <Link to="/" className="text-xs text-muted-foreground hover:text-primary">View site →</Link>
         </div>

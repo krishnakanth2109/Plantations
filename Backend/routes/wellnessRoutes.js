@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { requireAdmin, requireAuth } from "../middleware/auth.js";
 import Ticket from "../models/Ticket.js";
+import Notification from "../models/Notification.js";
+import User from "../models/User.js";
+import { sendNotificationToUser, sendNotificationToAdmins } from "../config/socket.js";
 
 const router = Router();
 const ticketPopulate = { path: "customerId", select: "name email phone address" };
@@ -19,6 +22,34 @@ router.post("/", requireAuth, async (req, res, next) => {
     });
 
     await ticket.populate(ticketPopulate);
+
+    // Create notification for the customer
+    const customerNotification = await Notification.create({
+      userId: req.user.id,
+      title: "Wellness ticket created",
+      body: `Your wellness ticket for "${issue.slice(0, 40)}${issue.length > 40 ? "..." : ""}" has been received.`,
+      type: "wellness",
+      refId: ticket._id,
+    });
+    sendNotificationToUser(req.user.id, customerNotification);
+
+    // Notify admins about the new wellness ticket
+    const admins = await User.find({ role: "admin" }).select("_id");
+    if (admins.length > 0) {
+      const adminNotifications = await Notification.insertMany(
+        admins.map((admin) => ({
+          userId: admin._id,
+          title: "New wellness ticket",
+          body: `${req.user.name || "A customer"} opened a wellness ticket: "${issue.slice(0, 40)}${issue.length > 40 ? "..." : ""}"`,
+          type: "wellness",
+          refId: ticket._id,
+        }))
+      );
+      if (adminNotifications.length > 0) {
+        sendNotificationToAdmins(adminNotifications[0]);
+      }
+    }
+
     return res.status(201).json({ ticket });
   } catch (error) {
     next(error);
@@ -53,6 +84,20 @@ router.patch("/:id/diagnose", requireAuth, requireAdmin, async (req, res, next) 
       { new: true, runValidators: true },
     ).populate(ticketPopulate);
     if (!ticket) return res.status(404).json({ message: "Wellness ticket not found" });
+
+    // Notify client about diagnosis
+    if (ticket.customerId) {
+      const customerId = typeof ticket.customerId === "object" ? ticket.customerId._id : ticket.customerId;
+      const statusNotification = await Notification.create({
+        userId: customerId,
+        title: "Wellness ticket diagnosed",
+        body: `Your wellness ticket has been diagnosed: "${req.body.diagnosis.slice(0, 50)}..."`,
+        type: "wellness",
+        refId: ticket._id,
+      });
+      sendNotificationToUser(customerId, statusNotification);
+    }
+
     return res.json({ ticket });
   } catch (error) {
     next(error);
@@ -67,6 +112,20 @@ router.post("/:id/diagnose", requireAuth, requireAdmin, async (req, res, next) =
       { new: true, runValidators: true },
     ).populate(ticketPopulate);
     if (!ticket) return res.status(404).json({ message: "Wellness ticket not found" });
+
+    // Notify client about diagnosis
+    if (ticket.customerId) {
+      const customerId = typeof ticket.customerId === "object" ? ticket.customerId._id : ticket.customerId;
+      const statusNotification = await Notification.create({
+        userId: customerId,
+        title: "Wellness ticket diagnosed",
+        body: `Your wellness ticket has been diagnosed: "${req.body.diagnosis.slice(0, 50)}..."`,
+        type: "wellness",
+        refId: ticket._id,
+      });
+      sendNotificationToUser(customerId, statusNotification);
+    }
+
     return res.json({ ticket });
   } catch (error) {
     next(error);
@@ -81,7 +140,37 @@ router.patch("/:id/resolve", requireAuth, requireAdmin, async (req, res, next) =
       { new: true, runValidators: true },
     ).populate(ticketPopulate);
     if (!ticket) return res.status(404).json({ message: "Wellness ticket not found" });
+
+    // Notify client about resolution
+    if (ticket.customerId) {
+      const customerId = typeof ticket.customerId === "object" ? ticket.customerId._id : ticket.customerId;
+      const statusNotification = await Notification.create({
+        userId: customerId,
+        title: "Wellness ticket resolved",
+        body: `Your wellness ticket has been marked as resolved.`,
+        type: "wellness",
+        refId: ticket._id,
+      });
+      sendNotificationToUser(customerId, statusNotification);
+    }
+
     return res.json({ ticket });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete("/:id", requireAuth, async (req, res, next) => {
+  try {
+    const ticket = await Ticket.findById(req.params.id);
+    if (!ticket) return res.status(404).json({ message: "Wellness ticket not found" });
+
+    if (ticket.customerId.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized to delete this ticket" });
+    }
+
+    await Ticket.findByIdAndDelete(req.params.id);
+    return res.json({ ok: true, message: "Ticket deleted successfully" });
   } catch (error) {
     next(error);
   }

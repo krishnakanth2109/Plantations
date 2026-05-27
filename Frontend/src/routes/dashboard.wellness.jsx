@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { createFileRoute } from "../lib/router";
 import { PageHeader, Badge, statusTone } from "../components/dashboard/DashboardShell";
-import { createWellnessTicket, getMyWellnessTickets } from "../api";
+import { createWellnessTicket, getMyWellnessTickets, deleteWellnessTicket } from "../api";
+import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const Route = createFileRoute("/dashboard/wellness")({ component: Page });
@@ -21,6 +22,17 @@ function Page() {
   const [issue, setIssue] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  async function handleDelete(id) {
+    if (!confirm("Are you sure you want to delete this wellness ticket?")) return;
+    try {
+      await deleteWellnessTicket(id);
+      setItems((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Ticket deleted");
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
 
   async function fetchTickets() {
     setLoading(true);
@@ -71,7 +83,16 @@ function Page() {
           <div key={t.id} className="rounded-2xl border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <div className="text-xs text-muted-foreground">{t.created}</div>
-              <Badge tone={statusTone(t.status)}>{t.status}</Badge>
+              <div className="flex items-center gap-3">
+                <Badge tone={statusTone(t.status)}>{t.status}</Badge>
+                <button
+                  onClick={() => handleDelete(t.id)}
+                  className="rounded-full p-1.5 hover:bg-secondary text-rose-600 transition"
+                  aria-label="Delete ticket"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
             </div>
             <h4 className="mt-1 font-medium">{t.issue}</h4>
             {t.diagnosis && <p className="mt-2 rounded-lg bg-secondary/60 p-3 text-sm"><strong>Expert says:</strong> {t.diagnosis}</p>}

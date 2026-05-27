@@ -138,7 +138,8 @@ function App() {
           <Route index element={<DashboardIndexRoute.component />} />
           {dashboardRoutes.filter(r => r.path !== "/dashboard").map((route) => {
             const Component = route.component;
-            return <Route key={route.path} path={route.path} element={<Component />} />;
+            const relativePath = route.path.replace(/^\/dashboard\//, "");
+            return <Route key={route.path} path={relativePath} element={<Component />} />;
           })}
         </Route>
 
@@ -147,7 +148,8 @@ function App() {
           <Route index element={<AdminIndexRoute.component />} />
           {adminRoutes.filter(r => r.path !== "/admin").map((route) => {
             const Component = route.component;
-            return <Route key={route.path} path={route.path} element={<Component />} />;
+            const relativePath = route.path.replace(/^\/admin\//, "");
+            return <Route key={route.path} path={relativePath} element={<Component />} />;
           })}
         </Route>
 

@@ -77,6 +77,7 @@ const getMyWellnessTickets = async () => (await api.get("/api/wellness-tickets/m
 const getAllWellnessTickets = async () => (await api.get("/api/wellness-tickets")).data;
 const diagnoseWellnessTicket = async (id, diagnosis) => (await api.post(`/api/wellness-tickets/${id}/diagnose`, { diagnosis })).data;
 const resolveWellnessTicket = async (id) => (await api.patch(`/api/wellness-tickets/${id}/resolve`)).data;
+const deleteWellnessTicket = async (id) => (await api.delete(`/api/wellness-tickets/${id}`)).data;
 const getLibraryArticles = async () => (await api.get("/api/library")).data;
 const getLibraryArticleBySlug = async (slug) => (await api.get(`/api/library/${slug}`)).data;
 const createLibraryArticle = async (data) => (await api.post("/api/library", data)).data;
@@ -107,6 +108,10 @@ const getCustomers = async () => (await api.get("/api/customers")).data;
 const createCustomer = async (data) => (await api.post("/api/customers", data)).data;
 const updateCustomer = async (id, data) => (await api.put(`/api/customers/${id}`, data)).data;
 const deleteCustomer = async (id) => (await api.delete(`/api/customers/${id}`)).data;
+const getMyNotifications = async () => (await api.get("/api/notifications/my")).data;
+const markNotificationRead = async (id) => (await api.patch(`/api/notifications/${id}/read`)).data;
+const markAllNotificationsRead = async () => (await api.patch("/api/notifications/read-all")).data;
+const getUnreadNotificationCount = async () => (await api.get("/api/notifications/unread-count")).data;
 var stdin_default = api;
 export {
   addWishlistItem,
@@ -164,5 +169,10 @@ export {
   getCustomers,
   createCustomer,
   updateCustomer,
-  deleteCustomer
+  deleteCustomer,
+  getMyNotifications,
+  markNotificationRead,
+  markAllNotificationsRead,
+  getUnreadNotificationCount,
+  deleteWellnessTicket
 };
