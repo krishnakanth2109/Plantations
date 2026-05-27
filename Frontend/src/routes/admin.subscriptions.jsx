@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { createFileRoute } from "../lib/router";
 import { PageHeader, Badge, statusTone } from "../components/dashboard/DashboardShell";
-import { getAllSubscriptions, renewSubscription, updateSubscriptionStatus } from "../api";
+import { getAllSubscriptions, renewSubscription, updateSubscriptionStatus, resolveSubscriptionUpgrade } from "../api";
 import { toast } from "sonner";
 
 const Route = createFileRoute("/admin/subscriptions")({ component: Page });
@@ -15,12 +15,25 @@ function mapSubscription(subscription) {
     start: subscription.startDate ? new Date(subscription.startDate).toLocaleDateString("en-IN") : "",
     renewal: subscription.renewalDate ? new Date(subscription.renewalDate).toLocaleDateString("en-IN") : "",
     status: subscription.status,
+    pendingUpgradePlanName: subscription.pendingUpgradePlanName,
+    pendingUpgradePlantsCount: subscription.pendingUpgradePlantsCount,
+    upgradeRequestStatus: subscription.upgradeRequestStatus,
   };
 }
 
 function Page() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  async function resolveUpgrade(id, actionVal) {
+    try {
+      const data = await resolveSubscriptionUpgrade(id, actionVal);
+      setItems((prev) => prev.map((s) => (s.id === id ? mapSubscription(data.subscription) : s)));
+      toast.success(`Upgrade request ${actionVal === "approve" ? "approved" : "declined"}`);
+    } catch (error) {
+      toast.error(error.message || "Failed to resolve upgrade request");
+    }
+  }
 
   useEffect(() => {
     let active = true;
@@ -75,9 +88,27 @@ function Page() {
               <div className="flex justify-between"><dt className="text-muted-foreground">Start</dt><dd>{s.start}</dd></div>
               <div className="flex justify-between"><dt className="text-muted-foreground">Renewal</dt><dd>{s.renewal}</dd></div>
             </dl>
+            {s.upgradeRequestStatus === "Pending" && (
+              <div className="mt-3 rounded-xl bg-amber-500/10 border border-amber-500/20 p-2.5 text-[11px] text-amber-800 leading-normal flex flex-col gap-0.5">
+                <span className="font-semibold block">
+                  {s.pendingUpgradePlanName === "Fully Customized" ? "Upgrade Requested:" : "Plan Change Requested:"}
+                </span>
+                <span>wants to switch to <strong>{s.pendingUpgradePlanName}</strong> ({s.pendingUpgradePlantsCount} plants)</span>
+              </div>
+            )}
             <div className="mt-4 flex flex-wrap gap-2">
               {s.status === "Active" && <button onClick={() => action(s.id, "Paused")} className="rounded-full border border-border px-3 py-1 text-xs">Pause</button>}
               {s.status === "Paused" && <button onClick={() => action(s.id, "Active")} className="rounded-full border border-border px-3 py-1 text-xs">Resume</button>}
+              
+              {s.upgradeRequestStatus === "Pending" && (
+                <>
+                  <button onClick={() => resolveUpgrade(s.id, "approve")} className="rounded-full bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 text-xs font-semibold transition cursor-pointer">
+                    {s.pendingUpgradePlanName === "Fully Customized" ? "Accept Upgrade" : "Accept Change"}
+                  </button>
+                  <button onClick={() => resolveUpgrade(s.id, "reject")} className="rounded-full bg-rose-600 hover:bg-rose-700 text-white px-3 py-1 text-xs font-semibold transition cursor-pointer">Reject</button>
+                </>
+              )}
+
               <button onClick={() => renew(s.id)} className="rounded-full bg-primary px-3 py-1 text-xs text-primary-foreground">Renew +6mo</button>
               {s.status !== "Cancelled" && <button onClick={() => action(s.id, "Cancelled")} className="rounded-full border border-border px-3 py-1 text-xs text-rose-600">Cancel</button>}
             </div>

@@ -15,6 +15,9 @@ function mapSubscription(subscription) {
     start: subscription.startDate ? new Date(subscription.startDate).toLocaleDateString("en-IN") : "",
     renewal: subscription.renewalDate ? new Date(subscription.renewalDate).toLocaleDateString("en-IN") : "",
     status: subscription.status,
+    pendingUpgradePlanName: subscription.pendingUpgradePlanName,
+    pendingUpgradePlantsCount: subscription.pendingUpgradePlantsCount,
+    upgradeRequestStatus: subscription.upgradeRequestStatus,
   };
 }
 
@@ -91,7 +94,11 @@ function Page() {
         plan: planDoc.name,
         plantsCount
       });
-      toast.success("Maintenance plan updated successfully");
+      if (data.upgradeRequested) {
+        toast.success("Plan change request sent to admin for approval");
+      } else {
+        toast.success("Maintenance plan updated successfully");
+      }
       const mapped = mapSubscription(data.subscription);
       setItems((prev) => {
         const exists = prev.some((x) => x.id === mapped.id);
@@ -134,6 +141,15 @@ function Page() {
               <div className="flex justify-between"><dt className="text-muted-foreground">Start</dt><dd>{s.start}</dd></div>
               <div className="flex justify-between"><dt className="text-muted-foreground">Renewal</dt><dd>{s.renewal}</dd></div>
             </dl>
+            {s.upgradeRequestStatus === "Pending" && (
+              <div className="mt-4 rounded-xl bg-primary/10 border border-primary/20 p-3 text-xs text-primary leading-normal flex flex-col gap-1">
+                <span className="font-semibold flex items-center gap-1.5">
+                  <span className="animate-pulse h-2 w-2 rounded-full bg-primary" />
+                  Upgrade Request Pending
+                </span>
+                <span>You requested to upgrade to the <strong>{s.pendingUpgradePlanName}</strong> plan ({s.pendingUpgradePlantsCount} plants). An admin will review it shortly.</span>
+              </div>
+            )}
           </div>
         ))}
         {!loading && items.length === 0 && <div className="md:col-span-2 rounded-2xl border border-dashed border-border bg-card p-10 text-center text-muted-foreground">No active plans. Click Explore Plans to subscribe.</div>}
@@ -260,12 +276,16 @@ function Page() {
                 ⚠️
               </div>
               <h3 className="mt-4 font-display text-xl text-primary">
-                {confirmModal.isSame ? "Re-book Current Plan?" : "Upgrade Plan Coverage?"}
+                {confirmModal.isSame 
+                  ? "Re-book Current Plan?" 
+                  : confirmModal.planDoc.name === "Fully Customized"
+                  ? "Upgrade Plan Coverage?" 
+                  : "Change Plan Coverage?"}
               </h3>
               <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
                 {confirmModal.isSame 
                   ? `You already have an active subscription to the ${confirmModal.planDoc.name} Plan. Re-booking will overwrite your current configuration.` 
-                  : `You are upgrading your plant wellness plan from the ${confirmModal.activePlan} Plan to the ${confirmModal.planDoc.name} Plan.`}
+                  : `You are requesting to change your plant wellness plan from the ${confirmModal.activePlan} Plan to the ${confirmModal.planDoc.name} Plan. This requires admin approval. Your current plan will remain active until reviewed.`}
               </p>
               <div className="mt-6 flex gap-3">
                 <button
@@ -282,7 +302,7 @@ function Page() {
                   }}
                   className="flex-1 rounded-full bg-primary py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 cursor-pointer transition"
                 >
-                  Confirm Change
+                  {confirmModal.isSame ? "Confirm Change" : "Send Request"}
                 </button>
               </div>
             </div>

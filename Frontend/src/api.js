@@ -69,6 +69,7 @@ const getMySubscriptions = async () => (await api.get("/api/subscriptions/my")).
 const getAllSubscriptions = async () => (await api.get("/api/subscriptions")).data;
 const updateSubscriptionStatus = async (id, data) => (await api.patch(`/api/subscriptions/${id}/status`, data)).data;
 const renewSubscription = async (id, months = 6) => (await api.patch(`/api/subscriptions/${id}/renew`, { months })).data;
+const deleteSubscription = async (id) => (await api.delete(`/api/subscriptions/${id}`)).data;
 const getMyPayments = async () => (await api.get("/api/payments/my")).data;
 const getAllPayments = async () => (await api.get("/api/payments")).data;
 const updatePaymentStatus = async (id, status) => (await api.patch(`/api/payments/${id}/status`, { status })).data;
@@ -112,6 +113,8 @@ const getMyNotifications = async () => (await api.get("/api/notifications/my")).
 const markNotificationRead = async (id) => (await api.patch(`/api/notifications/${id}/read`)).data;
 const markAllNotificationsRead = async () => (await api.patch("/api/notifications/read-all")).data;
 const getUnreadNotificationCount = async () => (await api.get("/api/notifications/unread-count")).data;
+const deleteNotification = async (id) => (await api.delete(`/api/notifications/${id}`)).data;
+const resolveSubscriptionUpgrade = async (id, action) => (await api.patch(`/api/subscriptions/${id}/upgrade-resolve`, { action })).data;
 var stdin_default = api;
 export {
   addWishlistItem,
@@ -174,5 +177,8 @@ export {
   markNotificationRead,
   markAllNotificationsRead,
   getUnreadNotificationCount,
-  deleteWellnessTicket
+  deleteWellnessTicket,
+  deleteSubscription,
+  deleteNotification,
+  resolveSubscriptionUpgrade
 };
