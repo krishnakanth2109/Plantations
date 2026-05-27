@@ -63,7 +63,26 @@ function Page() {
     }
   }, [showExplore]);
 
+  const [confirmModal, setConfirmModal] = useState(null);
+
   async function subscribe(planDoc) {
+    const id = planDoc._id || planDoc.id;
+    
+    // Check if there is an active subscription
+    const activeSub = items.find((s) => s.status === "Active" || s.status === "Pending");
+    if (activeSub) {
+      setConfirmModal({
+        planDoc,
+        isSame: activeSub.plan === planDoc.name,
+        activePlan: activeSub.plan
+      });
+      return;
+    }
+
+    executeSubscribe(planDoc);
+  }
+
+  async function executeSubscribe(planDoc) {
     const id = planDoc._id || planDoc.id;
     setSubmittingPlan(id);
     try {
@@ -72,8 +91,15 @@ function Page() {
         plan: planDoc.name,
         plantsCount
       });
-      toast.success("Maintenance plan requested successfully");
-      setItems(p => [mapSubscription(data.subscription), ...p]);
+      toast.success("Maintenance plan updated successfully");
+      const mapped = mapSubscription(data.subscription);
+      setItems((prev) => {
+        const exists = prev.some((x) => x.id === mapped.id);
+        if (exists) {
+          return prev.map((x) => (x.id === mapped.id ? mapped : x));
+        }
+        return [mapped, ...prev];
+      });
       setShowExplore(false);
     } catch (error) {
       toast.error(error.message || "Failed to request plan");
@@ -153,10 +179,22 @@ function Page() {
               <div className="mt-6 grid gap-6 md:grid-cols-2">
                 {plans.map((p) => {
                   const id = p._id || p.id;
+                  const activeSub = items.find((s) => s.status === "Active" || s.status === "Pending");
+                  const isCurrentPlan = activeSub?.plan === p.name;
+                  
                   return (
-                    <div key={id} className="rounded-2xl border border-border bg-secondary/20 p-5 flex flex-col justify-between">
+                    <div key={id} className={`rounded-2xl border p-5 flex flex-col justify-between transition ${
+                      isCurrentPlan ? "border-amber-500/30 bg-amber-500/5 shadow-sm" : "border-border bg-secondary/20"
+                    }`}>
                       <div>
-                        <h4 className="font-display text-lg text-primary">{p.name} Maintenance</h4>
+                        <div className="flex items-start justify-between">
+                          <h4 className="font-display text-lg text-primary">{p.name} Maintenance</h4>
+                          {isCurrentPlan && (
+                            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-800 border border-amber-500/20">
+                              Active
+                            </span>
+                          )}
+                        </div>
                         <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
                           {p.description}
                         </p>
@@ -168,7 +206,19 @@ function Page() {
                           ))}
                         </ul>
                       </div>
-                      <div className="mt-4 border-t border-border pt-4">
+                      <div className="mt-5 border-t border-border pt-4">
+                        {isCurrentPlan ? (
+                          <div className="mb-3 rounded-xl bg-amber-500/10 border border-amber-500/20 p-2.5 text-[10px] text-amber-800 flex gap-2 items-center leading-normal">
+                            <span>⚠️</span>
+                            <span>This is your current active plan. Re-booking will reset your billing start date.</span>
+                          </div>
+                        ) : activeSub ? (
+                          <div className="mb-3 rounded-xl bg-primary/10 border border-primary/20 p-2.5 text-[10px] text-primary flex gap-2 items-center leading-normal">
+                            <span>✨</span>
+                            <span>Selecting this will upgrade your current {activeSub.plan} plan coverage.</span>
+                          </div>
+                        ) : null}
+
                         {p.priceNote && (
                           <p className="text-[10px] italic text-muted-foreground mb-3 bg-card p-2 rounded border border-border/40">
                             {p.priceNote}
@@ -177,9 +227,19 @@ function Page() {
                         <button
                           onClick={() => subscribe(p)}
                           disabled={submittingPlan === id}
-                          className="w-full py-2 px-3 rounded-full bg-primary hover:bg-primary/95 text-xs font-semibold text-primary-foreground disabled:opacity-60 cursor-pointer"
+                          className={`w-full py-2 px-3 rounded-full text-xs font-semibold disabled:opacity-60 cursor-pointer transition ${
+                            isCurrentPlan 
+                              ? "bg-amber-600 hover:bg-amber-700 text-white" 
+                              : "bg-primary hover:bg-primary/95 text-primary-foreground"
+                          }`}
                         >
-                          {submittingPlan === id ? "Requesting..." : "Book this plan"}
+                          {submittingPlan === id 
+                            ? "Requesting..." 
+                            : isCurrentPlan 
+                            ? "Renew / Re-book Plan" 
+                            : activeSub 
+                            ? "Upgrade to this Plan" 
+                            : "Book this plan"}
                         </button>
                       </div>
                     </div>
@@ -187,6 +247,45 @@ function Page() {
                 })}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Premium Glassmorphic Confirmation Modal */}
+      {confirmModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-100">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl animate-in zoom-in-95 duration-150">
+            <div className="text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-xl text-amber-600">
+                ⚠️
+              </div>
+              <h3 className="mt-4 font-display text-xl text-primary">
+                {confirmModal.isSame ? "Re-book Current Plan?" : "Upgrade Plan Coverage?"}
+              </h3>
+              <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
+                {confirmModal.isSame 
+                  ? `You already have an active subscription to the ${confirmModal.planDoc.name} Plan. Re-booking will overwrite your current configuration.` 
+                  : `You are upgrading your plant wellness plan from the ${confirmModal.activePlan} Plan to the ${confirmModal.planDoc.name} Plan.`}
+              </p>
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => setConfirmModal(null)}
+                  className="flex-1 rounded-full border border-border py-2.5 text-xs font-semibold hover:bg-secondary cursor-pointer transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    const plan = confirmModal.planDoc;
+                    setConfirmModal(null);
+                    executeSubscribe(plan);
+                  }}
+                  className="flex-1 rounded-full bg-primary py-2.5 text-xs font-semibold text-primary-foreground hover:bg-primary/95 cursor-pointer transition"
+                >
+                  Confirm Change
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

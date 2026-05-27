@@ -67,12 +67,35 @@ subscriptionRouter.post("/", requireAuth, async (req, res, next) => {
     const planDoc = planId ? await MaintenancePlan.findById(planId) : null;
     if (planId && !planDoc) return res.status(404).json({ message: "Maintenance plan not found" });
 
+    const targetCustomerId = req.user.role === "admin" && customerId ? customerId : req.user.id;
+    
+    // Find if there is an existing active or pending subscription for this customer
+    const existingSubscription = await Subscription.findOne({ 
+      customerId: targetCustomerId,
+      status: { $in: ["Active", "Pending"] }
+    });
+
     const start = new Date(startDate);
     const renewal = renewalDate ? new Date(renewalDate) : new Date(start);
     if (!renewalDate) renewal.setMonth(renewal.getMonth() + 6);
 
+    if (existingSubscription) {
+      // Upgrade / Update existing subscription
+      existingSubscription.planId = planDoc?._id;
+      existingSubscription.plan = planDoc?.name || plan;
+      existingSubscription.plantsCount = plantsCount;
+      existingSubscription.startDate = start;
+      existingSubscription.renewalDate = renewal;
+      existingSubscription.notes = notes || existingSubscription.notes;
+      existingSubscription.status = "Active";
+
+      await existingSubscription.save();
+      await existingSubscription.populate(subscriptionPopulate);
+      return res.status(200).json({ subscription: existingSubscription });
+    }
+
     const subscription = await Subscription.create({
-      customerId: req.user.role === "admin" && customerId ? customerId : req.user.id,
+      customerId: targetCustomerId,
       planId: planDoc?._id,
       plan: planDoc?.name || plan,
       plantsCount,
@@ -139,6 +162,22 @@ subscriptionRouter.patch("/:id/renew", requireAuth, requireAdmin, async (req, re
     await subscription.populate(subscriptionPopulate);
 
     return res.json({ subscription });
+  } catch (error) {
+    next(error);
+  }
+});
+
+subscriptionRouter.delete("/:id", requireAuth, async (req, res, next) => {
+  try {
+    const subscription = await Subscription.findById(req.params.id);
+    if (!subscription) return res.status(404).json({ message: "Subscription not found" });
+
+    if (subscription.customerId.toString() !== req.user.id && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized to delete this subscription" });
+    }
+
+    await Subscription.findByIdAndDelete(req.params.id);
+    return res.json({ ok: true, message: "Subscription deleted successfully" });
   } catch (error) {
     next(error);
   }
