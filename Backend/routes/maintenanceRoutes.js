@@ -2,6 +2,8 @@ import { Router } from "express";
 import { requireAdmin, requireAuth } from "../middleware/auth.js";
 import MaintenancePlan from "../models/MaintenancePlan.js";
 import Subscription from "../models/Subscription.js";
+import User from "../models/User.js";
+import Notification from "../models/Notification.js";
 
 export const maintenancePlanRouter = Router();
 export const subscriptionRouter = Router();
@@ -79,19 +81,56 @@ subscriptionRouter.post("/", requireAuth, async (req, res, next) => {
     const renewal = renewalDate ? new Date(renewalDate) : new Date(start);
     if (!renewalDate) renewal.setMonth(renewal.getMonth() + 6);
 
+    // If there is an existing subscription and the customer is trying to select a DIFFERENT plan,
+    // we create a pending upgrade request instead of direct switching!
     if (existingSubscription) {
-      // Upgrade / Update existing subscription
-      existingSubscription.planId = planDoc?._id;
-      existingSubscription.plan = planDoc?.name || plan;
-      existingSubscription.plantsCount = plantsCount;
-      existingSubscription.startDate = start;
-      existingSubscription.renewalDate = renewal;
-      existingSubscription.notes = notes || existingSubscription.notes;
-      existingSubscription.status = "Active";
+      const planName = planDoc?.name || plan;
+      
+      if (existingSubscription.plan !== planName) {
+        // Create an upgrade/change request!
+        existingSubscription.pendingUpgradePlanId = planDoc?._id;
+        existingSubscription.pendingUpgradePlanName = planName;
+        existingSubscription.pendingUpgradePlantsCount = plantsCount;
+        existingSubscription.upgradeRequestStatus = "Pending";
+        
+        await existingSubscription.save();
+        await existingSubscription.populate(subscriptionPopulate);
 
-      await existingSubscription.save();
-      await existingSubscription.populate(subscriptionPopulate);
-      return res.status(200).json({ subscription: existingSubscription });
+        // Notify admins about the upgrade/change request
+        const user = await User.findById(targetCustomerId);
+        const admins = await User.find({ role: "admin" }).select("_id");
+        const isUpgrade = planName === "Fully Customized";
+        const actionVerb = isUpgrade ? "upgrade" : "change";
+        const requestTitle = isUpgrade ? "Plan Upgrade Requested" : "Plan Change Requested";
+        if (admins.length > 0) {
+          const adminNotifications = await Notification.insertMany(
+            admins.map((admin) => ({
+              userId: admin._id,
+              title: requestTitle,
+              body: `${user?.name || "A customer"} requested to ${actionVerb} from the ${existingSubscription.plan} Plan to the ${planName} Plan.`,
+              type: "subscription",
+              refId: existingSubscription._id,
+            }))
+          );
+          if (adminNotifications.length > 0) {
+            const { sendNotificationToAdmins } = await import("../config/socket.js");
+            sendNotificationToAdmins(adminNotifications[0]);
+          }
+        }
+
+        return res.status(200).json({ subscription: existingSubscription, upgradeRequested: true });
+      } else {
+        // Re-booking/renewing same plan directly
+        existingSubscription.plantsCount = plantsCount;
+        existingSubscription.startDate = start;
+        existingSubscription.renewalDate = renewal;
+        existingSubscription.notes = notes || existingSubscription.notes;
+        existingSubscription.status = "Active";
+
+        await existingSubscription.save();
+        await existingSubscription.populate(subscriptionPopulate);
+        return res.status(200).json({ subscription: existingSubscription });
+      }
     }
 
     const subscription = await Subscription.create({
@@ -182,3 +221,72 @@ subscriptionRouter.delete("/:id", requireAuth, async (req, res, next) => {
     next(error);
   }
 });
+
+subscriptionRouter.patch("/:id/upgrade-resolve", requireAuth, requireAdmin, async (req, res, next) => {
+  try {
+    const { action } = req.body; // "approve" or "reject"
+    const subscription = await Subscription.findById(req.params.id);
+    if (!subscription) return res.status(404).json({ message: "Subscription not found" });
+
+    if (subscription.upgradeRequestStatus !== "Pending") {
+      return res.status(400).json({ message: "No pending upgrade request found" });
+    }
+
+    const { sendNotificationToUser } = await import("../config/socket.js");
+    const Notification = (await import("../models/Notification.js")).default;
+
+    if (action === "approve") {
+      const targetPlanName = subscription.pendingUpgradePlanName || "new";
+      const isUpgrade = targetPlanName === "Fully Customized";
+
+      subscription.planId = subscription.pendingUpgradePlanId;
+      subscription.plan = subscription.pendingUpgradePlanName;
+      if (subscription.pendingUpgradePlantsCount) {
+        subscription.plantsCount = subscription.pendingUpgradePlantsCount;
+      }
+      subscription.upgradeRequestStatus = "Approved";
+
+      // Notify customer
+      const clientNotif = await Notification.create({
+        userId: subscription.customerId,
+        title: isUpgrade ? "Upgrade Approved!" : "Plan Change Approved!",
+        body: isUpgrade 
+          ? `Your request to upgrade to the ${subscription.plan} Plan has been approved.`
+          : `Your request to change to the ${subscription.plan} Plan has been approved.`,
+        type: "subscription",
+        refId: subscription._id,
+      });
+      sendNotificationToUser(subscription.customerId, clientNotif);
+    } else {
+      const targetPlanName = subscription.pendingUpgradePlanName || "new";
+      const isUpgrade = targetPlanName === "Fully Customized";
+
+      subscription.upgradeRequestStatus = "Rejected";
+
+      // Notify customer
+      const clientNotif = await Notification.create({
+        userId: subscription.customerId,
+        title: isUpgrade ? "Upgrade Declined" : "Plan Change Declined",
+        body: isUpgrade
+          ? `Your request to upgrade to the ${targetPlanName} Plan was declined.`
+          : `Your request to change to the ${targetPlanName} Plan was declined.`,
+        type: "subscription",
+        refId: subscription._id,
+      });
+      sendNotificationToUser(subscription.customerId, clientNotif);
+    }
+
+    // Reset pending upgrade fields
+    subscription.pendingUpgradePlanId = null;
+    subscription.pendingUpgradePlanName = null;
+    subscription.pendingUpgradePlantsCount = null;
+    subscription.upgradeRequestStatus = "None";
+
+    await subscription.save();
+    await subscription.populate(subscriptionPopulate);
+    return res.json({ subscription });
+  } catch (error) {
+    next(error);
+  }
+});
+

@@ -48,12 +48,16 @@ function Maintenance() {
     const id = planDoc._id || planDoc.id;
     setSubmitting(id);
     try {
-      await createSubscription({ 
+      const data = await createSubscription({ 
         planId: id, 
         plan: planDoc.name, 
         plantsCount 
       });
-      toast.success("Maintenance plan requested");
+      if (data?.upgradeRequested) {
+        toast.success("Plan change request sent to admin for approval");
+      } else {
+        toast.success("Maintenance plan requested");
+      }
       navigate({ to: "/dashboard/maintenance" });
     } catch (error) {
       toast.error(error.message);
