@@ -42,6 +42,10 @@ const getCurrentUser = async () => {
   const response = await api.get("/api/auth/me");
   return response.data;
 };
+const forgotPassword = async (email) => {
+  const response = await api.post("/api/auth/forgot-password", { email });
+  return response.data;
+};
 const seedDatabase = async () => {
   const response = await api.post("/api/seed");
   return response.data;
@@ -141,6 +145,7 @@ export {
   getAllSubscriptions,
   getAllWellnessTickets,
   getCurrentUser,
+  forgotPassword,
   getLibraryArticleBySlug,
   getLibraryArticles,
   getLeads,
