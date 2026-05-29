@@ -1,6 +1,10 @@
 import React from "react";
 import { createFileRoute, Link } from "../lib/router";
 import { SiteLayout } from "../components/site/SiteLayout";
+
+// CORRECTED IMPORT PATH: Goes up one folder to find the video in the src directory
+import logoVideo from "../logo_video_123.mp4";
+
 import hero from "../assets/hero.jpg";
 import indoor from "../assets/indoor.jpg";
 import balcony from "../assets/balcony.jpg";
@@ -29,43 +33,36 @@ const services = [
 ];
 
 function Index() {
-  return <SiteLayout>
+  return (
+    <SiteLayout>
 
-      {/* HERO — AUTOPLAY VIDEO + CONTENT OVERLAY */}
-      <section className="relative w-full overflow-hidden bg-[#050505]" style={{ minHeight: '100svh' }}>
+      {/* HERO — RESPONSIVE LAYOUT */}
+      {/* Mobile: Flex Column (Video top, Text bottom) | Desktop: Block with 100vh height */}
+      <section className="relative w-full overflow-hidden bg-[#050505] flex flex-col md:block md:min-h-[100svh]">
 
-        {/* YouTube iframe — fills full height on all screens */}
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0"
-          style={{
-            width: '150%',
-            height: '150%',
-            clipPath: 'inset(15% 15%)'
-          }}
-        >
-          <iframe
-            className="w-full h-full border-none"
-            style={{ pointerEvents: 'none' }}
-            src="https://www.youtube-nocookie.com/embed/_drMD4N_W0k?autoplay=1&mute=1&loop=1&playlist=_drMD4N_W0k&controls=0&fs=0&disablekb=1&playsinline=1&modestbranding=1&rel=0&iv_load_policy=3"
-            title="Yogini Planters Background Video"
-            tabIndex={-1}
-            aria-hidden="true"
-            allow="autoplay; encrypted-media"
-          />
+        {/* Video Container */}
+        {/* Mobile: Fixed 50vh height | Desktop: Absolute inset filling the section */}
+        <div className="relative w-full h-[50vh] sm:h-[60vh] md:h-full md:absolute md:inset-0 z-0 shrink-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src={logoVideo} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+
+          {/* Gradient Overlay */}
+          {/* Mobile: Fades black at the bottom to blend with text | Desktop: Full dark overlay for text readability */}
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent md:bg-gradient-to-b md:from-black/60 md:via-black/40 md:to-black/70" />
         </div>
 
-        {/* Dark gradient overlay */}
-        <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-black/40 to-black/70" />
-
-        {/* Interaction blocker */}
-        <div
-          className="absolute inset-0 z-20 w-full h-full"
-          style={{ background: 'transparent', pointerEvents: 'all', cursor: 'default' }}
-        />
-
-        {/* Hero content */}
-        <div className="absolute inset-0 z-30 flex items-center pointer-events-none">
-          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-0">
+        {/* Hero Content */}
+        {/* Mobile: Flex item taking bottom space | Desktop: Absolute positioned centered overlay */}
+        <div className="relative z-20 flex flex-1 items-center md:absolute md:inset-0 md:pointer-events-none">
+          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 md:py-0 md:pointer-events-auto">
             <div className="max-w-2xl">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-white backdrop-blur">
                 <Leaf className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Indoor Plant Décor & Styling
@@ -76,7 +73,7 @@ function Index() {
               <p className="mt-3 sm:mt-6 max-w-xl text-sm sm:text-lg leading-relaxed text-white/85 drop-shadow">
                 Indoor plant styling, balcony makeovers, landscaping, and professional plant wellness services — designed to create elegant, healthy green spaces.
               </p>
-              <div className="mt-6 sm:mt-9 flex flex-wrap gap-3" style={{ pointerEvents: 'auto' }}>
+              <div className="mt-6 sm:mt-9 flex flex-wrap gap-3">
                 <Link
                   to="/contact"
                   className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-3 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-medium text-primary-foreground shadow-lg shadow-primary/20 transition hover:bg-primary/90"
@@ -203,7 +200,8 @@ function Index() {
         </div>
       </section>
 
-    </SiteLayout>;
+    </SiteLayout>
+  );
 }
 
 export { Route };
