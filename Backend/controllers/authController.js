@@ -165,6 +165,54 @@ export async function login(req, res, next) {
   }
 }
 
+export async function forgotPassword(req, res, next) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check if the user exists in our local MongoDB first.
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      // Return a successful message to prevent email enumeration.
+      return res.status(200).json({
+        message: "If an account exists with that email, a password reset link has been sent.",
+      });
+    }
+
+    const apiKey = requireWebApiKey();
+    const response = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestType: "PASSWORD_RESET",
+          email: normalizedEmail,
+        }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      const firebaseCode = data.error?.message || "FIREBASE_PASSWORD_RESET_FAILED";
+      const error = new Error(`Password reset failed: ${firebaseCode}`);
+      error.status = 400;
+      throw error;
+    }
+
+    return res.status(200).json({
+      message: "If an account exists with that email, a password reset link has been sent.",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 export async function me(req, res, next) {
   try {
     const user = await User.findById(req.user.id);
@@ -178,3 +226,6 @@ export async function me(req, res, next) {
     next(error);
   }
 }
+
+
+
