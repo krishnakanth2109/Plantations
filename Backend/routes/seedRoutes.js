@@ -14,6 +14,7 @@ import Subscription from "../models/Subscription.js";
 import Ticket from "../models/Ticket.js";
 import User from "../models/User.js";
 import WishlistItem from "../models/WishlistItem.js";
+import Cms from "../models/Cms.js";
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ export async function seedDatabase({ log = false } = {}) {
     Subscription.deleteMany({}),
     Ticket.deleteMany({}),
     User.deleteMany({ email: { $in: [seedUsers.admin.email, seedUsers.customer.email] } }),
+    Cms.deleteMany({}),
   ]);
 
   if (log) {
@@ -61,6 +63,7 @@ export async function seedDatabase({ log = false } = {}) {
     console.log(`- Subscriptions: ${deleted[7].deletedCount}`);
     console.log(`- Tickets: ${deleted[8].deletedCount}`);
     console.log(`- Seed users: ${deleted[9].deletedCount}`);
+    console.log(`- CMS config: ${deleted[10].deletedCount}`);
   }
 
   const firebaseAdminUser = await upsertFirebaseUser({
@@ -97,7 +100,7 @@ export async function seedDatabase({ log = false } = {}) {
     joinedAt: new Date("2025-08-12"),
   });
 
-  const [services, maintenancePlans, libraryArticles] = await Promise.all([
+  const [services, maintenancePlans, libraryArticles, cms] = await Promise.all([
     Service.create([
       {
         title: "Indoor Plant Styling",
@@ -215,6 +218,16 @@ export async function seedDatabase({ log = false } = {}) {
         sortOrder: 3,
       },
     ]),
+    Cms.create({
+      heroTitle: "Bringing Nature Into Everyday Living",
+      heroSubtitle: "Indoor plant styling, balcony makeovers, landscaping and wellness services.",
+      aboutHeadline: "Yogini — meaning the divine balance of nature",
+      aboutBody: "At Yogini Planters, we believe plants are more than decoration — they bring peace, beauty, wellness, health and positive energy.",
+      metaTitle: "Yogini Planters — Indoor Plant Styling & Wellness, Hyderabad",
+      metaDescription: "Elegant indoor plant styling, balcony makeovers, landscaping and plant wellness for modern homes, offices and cafés.",
+      bannerActive: true,
+      bannerText: "Monsoon offer: 20% off all maintenance plans — use code GREEN20"
+    }),
   ]);
 
   const indoorService = services.find((service) => service.slug === "indoor-plant-styling");
@@ -300,6 +313,7 @@ export async function seedDatabase({ log = false } = {}) {
       libraryArticles: libraryArticles.length,
       reviews: reviews.length,
       wishlistItems: wishlistItems.length,
+      cms: cms ? 1 : 0,
     },
     users: seedUsers,
   };
@@ -316,6 +330,7 @@ export async function seedDatabase({ log = false } = {}) {
     console.log(`- Library articles: ${result.counts.libraryArticles}`);
     console.log(`- Reviews: ${result.counts.reviews}`);
     console.log(`- Wishlist items: ${result.counts.wishlistItems}`);
+    console.log(`- CMS configurations: ${result.counts.cms}`);
     console.log("Login credentials:");
     console.log(`- Admin: ${seedUsers.admin.email} / ${seedUsers.admin.password}`);
     console.log(`- Customer: ${seedUsers.customer.email} / ${seedUsers.customer.password}`);

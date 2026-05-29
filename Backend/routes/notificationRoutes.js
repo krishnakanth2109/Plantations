@@ -2,8 +2,56 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import Notification from "../models/Notification.js";
+import User from "../models/User.js";
+import { getIO } from "../config/socket.js";
 
-const router = Router();
+const router = Router();  
+
+// Create a new notification
+router.post("/", requireAuth, async (req, res, next) => {
+  try {
+    const { userId, title, body, type, refId, sendToAdmins } = req.body;
+
+    if (sendToAdmins) {
+      const admins = await User.find({ role: "admin" });
+      const notifications = await Promise.all(
+        admins.map((admin) =>
+          Notification.create({
+            userId: admin._id,
+            title,
+            body,
+            type: type || "system",
+            refId,
+          })
+        )
+      );
+
+      if (notifications.length > 0) {
+        const io = getIO();
+        if (io) io.to("admin").emit("notification", notifications[0]);
+      }
+      return res.status(201).json({ message: "Notifications sent to admins", count: notifications.length });
+    } else {
+      if (!userId) {
+        return res.status(400).json({ message: "userId is required" });
+      }
+
+      const notification = await Notification.create({
+        userId,
+        title,
+        body,
+        type: type || "system",
+        refId,
+      });
+
+      const io = getIO();
+      if (io) io.to(userId.toString()).emit("notification", notification);
+      return res.status(201).json({ notification });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Get my notifications (most recent first)
 router.get("/my", requireAuth, async (req, res, next) => {

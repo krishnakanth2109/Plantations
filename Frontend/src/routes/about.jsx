@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { createFileRoute } from "../lib/router";
 import { SiteLayout } from "../components/site/SiteLayout";
 import about from "../assets/about.jpg";
+import { getCms } from "../api";
 import logo from "../../src/assets/logo.png";
 
 const Route = createFileRoute("/about")({
@@ -18,6 +19,23 @@ const Route = createFileRoute("/about")({
 
 function About() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [cms, setCms] = useState({
+    aboutHeadline: "A plant wellness & green styling brand",
+    aboutBody: "Yogini Planters specializes in creating beautiful, healthy, and long-lasting green spaces. We focus on indoor plant styling, balcony transformations, landscaping, and professional plant maintenance — tailored to each client's space and lifestyle."
+  });
+
+  useEffect(() => {
+    getCms()
+      .then((data) => {
+        if (data.cms) {
+          setCms(data.cms);
+          if (data.cms.metaTitle) {
+            document.title = "About — " + data.cms.metaTitle;
+          }
+        }
+      })
+      .catch((err) => console.error("Error loading CMS settings on About page:", err));
+  }, []);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -146,12 +164,10 @@ function About() {
         <div className="grid items-center gap-8 md:gap-12 md:grid-cols-2">
           <div>
             <h2 className="font-display text-3xl sm:text-4xl md:text-5xl text-primary leading-tight">
-              A plant wellness & green styling brand
+              {cms.aboutHeadline}
             </h2>
             <div className="mt-6 sm:mt-8 space-y-4 sm:space-y-5 text-foreground/85 leading-relaxed text-base sm:text-lg">
-              <p>Yogini Planters specializes in creating beautiful, healthy, and long-lasting green spaces. We focus on indoor plant styling, balcony transformations, landscaping, and professional plant maintenance — tailored to each client's space and lifestyle.</p>
-              <p>Our goal is to make plant care simple, elegant, and sustainable while helping customers enjoy the wellness benefits of nature in everyday spaces.</p>
-              <p>We provide personalized plant solutions for homes, offices, cafés, restaurants, villas, and commercial spaces — with a focus on aesthetics, plant health, and long-term maintenance.</p>
+              <p className="whitespace-pre-wrap">{cms.aboutBody}</p>
             </div>
           </div>
           <img 

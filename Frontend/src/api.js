@@ -119,6 +119,8 @@ const markAllNotificationsRead = async () => (await api.patch("/api/notification
 const getUnreadNotificationCount = async () => (await api.get("/api/notifications/unread-count")).data;
 const deleteNotification = async (id) => (await api.delete(`/api/notifications/${id}`)).data;
 const resolveSubscriptionUpgrade = async (id, action) => (await api.patch(`/api/subscriptions/${id}/upgrade-resolve`, { action })).data;
+const getCms = async () => (await api.get("/api/cms")).data;
+const updateCms = async (data) => (await api.post("/api/cms", data)).data;
 var stdin_default = api;
 export {
   addWishlistItem,
@@ -185,5 +187,7 @@ export {
   deleteWellnessTicket,
   deleteSubscription,
   deleteNotification,
-  resolveSubscriptionUpgrade
+  resolveSubscriptionUpgrade,
+  getCms,
+  updateCms
 };

@@ -4,7 +4,7 @@ import Booking from "../models/Booking.js";
 import Notification from "../models/Notification.js";
 import Service from "../models/Service.js";
 import User from "../models/User.js";
-import { sendNotificationToUser, sendNotificationToAdmins } from "../config/socket.js";
+import { getIO } from "../config/socket.js";
 
 const router = Router();
 const bookingPopulate = [
@@ -43,7 +43,8 @@ router.post("/", requireAuth, async (req, res, next) => {
       type: "booking",
       refId: booking._id,
     });
-    sendNotificationToUser(req.user.id, customerNotification);
+    const io = getIO();
+    if (io) io.to(req.user.id.toString()).emit("notification", customerNotification);
 
     // Also notify all admins about the new booking
     const admins = await User.find({ role: "admin" }).select("_id");
@@ -59,7 +60,8 @@ router.post("/", requireAuth, async (req, res, next) => {
       );
       // Send real-time notification to the admin room (take first one as representative or just emit a generic event)
       if (adminNotifications.length > 0) {
-        sendNotificationToAdmins(adminNotifications[0]);
+        const io = getIO();
+        if (io) io.to("admin").emit("notification", adminNotifications[0]);
       }
     }
 
@@ -98,7 +100,8 @@ router.patch("/:id/cancel", requireAuth, async (req, res, next) => {
       type: "booking",
       refId: booking._id,
     });
-    sendNotificationToUser(req.user.id, customerNotification);
+    const io = getIO();
+    if (io) io.to(req.user.id.toString()).emit("notification", customerNotification);
 
     // Notify admins about the cancellation
     const admins = await User.find({ role: "admin" }).select("_id");
@@ -113,7 +116,8 @@ router.patch("/:id/cancel", requireAuth, async (req, res, next) => {
         }))
       );
       if (adminNotifications.length > 0) {
-        sendNotificationToAdmins(adminNotifications[0]);
+        const io = getIO();
+        if (io) io.to("admin").emit("notification", adminNotifications[0]);
       }
     }
 
@@ -155,7 +159,8 @@ router.patch("/:id/status", requireAuth, requireAdmin, async (req, res, next) =>
         type: "booking",
         refId: booking._id,
       });
-      sendNotificationToUser(customerId, statusNotification);
+      const io = getIO();
+      if (io) io.to(customerId.toString()).emit("notification", statusNotification);
     }
 
     return res.json({ booking });

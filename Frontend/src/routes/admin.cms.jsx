@@ -1,7 +1,8 @@
 import React from "react";
 import { createFileRoute } from "../lib/router";
 import { PageHeader } from "../components/dashboard/DashboardShell";
-import { useStore } from "../lib/store";
+import { getCms, updateCms } from "../api";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 const init = {
   heroTitle: "Bringing Nature Into Everyday Living",
@@ -15,7 +16,35 @@ const init = {
 };
 const Route = createFileRoute("/admin/cms")({ component: Page });
 function Page() {
-  const [c, setC] = useStore("cms", init);
+  const [c, setC] = useState(init);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCms()
+      .then((data) => {
+        if (data.cms) {
+          setC(data.cms);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        toast.error("Failed to load CMS settings: " + err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      await updateCms(c);
+      toast.success("Website content saved successfully");
+    } catch (err) {
+      toast.error("Failed to save changes: " + err.message);
+    }
+  };
+
+  if (loading) {
+    return <div className="text-sm text-muted-foreground">Loading CMS settings…</div>;
+  }
   return <div className="space-y-6">
       <PageHeader title="Website CMS" subtitle="Edit homepage content, banner & SEO" />
 
@@ -52,7 +81,7 @@ function Page() {
           </div>
         </section>
 
-        <button onClick={() => toast.success("Website content saved")} className="rounded-full bg-primary px-6 py-3 text-sm text-primary-foreground">Save all changes</button>
+        <button onClick={handleSave} className="rounded-full bg-primary px-6 py-3 text-sm text-primary-foreground">Save all changes</button>
       </div>
     </div>;
 }

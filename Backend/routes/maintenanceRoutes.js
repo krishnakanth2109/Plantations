@@ -113,8 +113,9 @@ subscriptionRouter.post("/", requireAuth, async (req, res, next) => {
             }))
           );
           if (adminNotifications.length > 0) {
-            const { sendNotificationToAdmins } = await import("../config/socket.js");
-            sendNotificationToAdmins(adminNotifications[0]);
+            const { getIO } = await import("../config/socket.js");
+            const io = getIO();
+            if (io) io.to("admin").emit("notification", adminNotifications[0]);
           }
         }
 
@@ -232,7 +233,7 @@ subscriptionRouter.patch("/:id/upgrade-resolve", requireAuth, requireAdmin, asyn
       return res.status(400).json({ message: "No pending upgrade request found" });
     }
 
-    const { sendNotificationToUser } = await import("../config/socket.js");
+    const { getIO } = await import("../config/socket.js");
     const Notification = (await import("../models/Notification.js")).default;
 
     if (action === "approve") {
@@ -256,7 +257,8 @@ subscriptionRouter.patch("/:id/upgrade-resolve", requireAuth, requireAdmin, asyn
         type: "subscription",
         refId: subscription._id,
       });
-      sendNotificationToUser(subscription.customerId, clientNotif);
+      const io = getIO();
+      if (io) io.to(subscription.customerId.toString()).emit("notification", clientNotif);
     } else {
       const targetPlanName = subscription.pendingUpgradePlanName || "new";
       const isUpgrade = targetPlanName === "Fully Customized";
@@ -273,7 +275,8 @@ subscriptionRouter.patch("/:id/upgrade-resolve", requireAuth, requireAdmin, asyn
         type: "subscription",
         refId: subscription._id,
       });
-      sendNotificationToUser(subscription.customerId, clientNotif);
+      const io = getIO();
+      if (io) io.to(subscription.customerId.toString()).emit("notification", clientNotif);
     }
 
     // Reset pending upgrade fields

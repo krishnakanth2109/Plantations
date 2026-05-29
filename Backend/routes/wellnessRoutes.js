@@ -3,7 +3,7 @@ import { requireAdmin, requireAuth } from "../middleware/auth.js";
 import Ticket from "../models/Ticket.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
-import { sendNotificationToUser, sendNotificationToAdmins } from "../config/socket.js";
+import { getIO } from "../config/socket.js";
 
 const router = Router();
 const ticketPopulate = { path: "customerId", select: "name email phone address" };
@@ -31,7 +31,8 @@ router.post("/", requireAuth, async (req, res, next) => {
       type: "wellness",
       refId: ticket._id,
     });
-    sendNotificationToUser(req.user.id, customerNotification);
+    const io = getIO();
+    if (io) io.to(req.user.id.toString()).emit("notification", customerNotification);
 
     // Notify admins about the new wellness ticket
     const admins = await User.find({ role: "admin" }).select("_id");
@@ -46,7 +47,8 @@ router.post("/", requireAuth, async (req, res, next) => {
         }))
       );
       if (adminNotifications.length > 0) {
-        sendNotificationToAdmins(adminNotifications[0]);
+        const io = getIO();
+        if (io) io.to("admin").emit("notification", adminNotifications[0]);
       }
     }
 
@@ -95,7 +97,8 @@ router.patch("/:id/diagnose", requireAuth, requireAdmin, async (req, res, next) 
         type: "wellness",
         refId: ticket._id,
       });
-      sendNotificationToUser(customerId, statusNotification);
+      const io = getIO();
+      if (io) io.to(customerId.toString()).emit("notification", statusNotification);
     }
 
     return res.json({ ticket });
@@ -123,7 +126,8 @@ router.post("/:id/diagnose", requireAuth, requireAdmin, async (req, res, next) =
         type: "wellness",
         refId: ticket._id,
       });
-      sendNotificationToUser(customerId, statusNotification);
+      const io = getIO();
+      if (io) io.to(customerId.toString()).emit("notification", statusNotification);
     }
 
     return res.json({ ticket });
@@ -151,7 +155,8 @@ router.patch("/:id/resolve", requireAuth, requireAdmin, async (req, res, next) =
         type: "wellness",
         refId: ticket._id,
       });
-      sendNotificationToUser(customerId, statusNotification);
+      const io = getIO();
+      if (io) io.to(customerId.toString()).emit("notification", statusNotification);
     }
 
     return res.json({ ticket });

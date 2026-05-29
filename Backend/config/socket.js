@@ -62,15 +62,3 @@ export const initSocket = (server, allowedOrigins) => {
 export const getIO = () => {
   return io;
 };
-
-// Send notification to a specific user
-export const sendNotificationToUser = (userId, notification) => {
-  if (!io) return;
-  io.to(userId.toString()).emit("notification", notification);
-};
-
-// Send notification to all admins
-export const sendNotificationToAdmins = (notification) => {
-  if (!io) return;
-  io.to("admin").emit("notification", notification);
-};

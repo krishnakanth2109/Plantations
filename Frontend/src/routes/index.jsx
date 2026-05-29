@@ -12,6 +12,9 @@ import landscape from "../assets/landscape.jpg";
 import wellness from "../assets/wellness.jpg";
 import { Leaf, Sparkles, ShieldCheck, HeartHandshake, ArrowRight, Star } from "lucide-react";
 
+import { useEffect, useState } from "react";
+import { getCms } from "../api";
+
 const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -33,8 +36,58 @@ const services = [
 ];
 
 function Index() {
+  const [cms, setCms] = useState({
+    heroTitle: "Bringing Nature Into Everyday Living",
+    heroSubtitle: "Indoor plant styling, balcony makeovers, landscaping, and professional plant wellness services — designed to create elegant, healthy green spaces.",
+    bannerActive: false,
+    bannerText: ""
+  });
+
+  useEffect(() => {
+    getCms()
+      .then((data) => {
+        if (data.cms) {
+          setCms(data.cms);
+          if (data.cms.metaTitle) {
+            document.title = data.cms.metaTitle;
+          }
+          const metaDesc = document.querySelector('meta[name="description"]');
+          if (metaDesc && data.cms.metaDescription) {
+            metaDesc.setAttribute("content", data.cms.metaDescription);
+          }
+        }
+      })
+      .catch((err) => console.error("Error loading CMS settings on homepage:", err));
+  }, []);
+
   return (
     <SiteLayout>
+      {cms.bannerActive && cms.bannerText && (
+        <div className="relative w-full overflow-hidden bg-primary text-primary-foreground py-2.5 text-xs sm:text-sm font-semibold tracking-wide border-b border-white/10 z-30">
+          <style>{`
+            @keyframes marquee {
+              0% { transform: translateX(0%); }
+              100% { transform: translateX(-50%); }
+            }
+            .animate-marquee-custom {
+              display: inline-flex;
+              white-space: nowrap;
+              animation: marquee 25s linear infinite;
+            }
+            .animate-marquee-custom:hover {
+              animation-play-state: paused;
+            }
+          `}</style>
+          <div className="animate-marquee-custom">
+            <span className="px-10">{cms.bannerText}</span>
+            <span className="px-10">{cms.bannerText}</span>
+            <span className="px-10">{cms.bannerText}</span>
+            <span className="px-10">{cms.bannerText}</span>
+            <span className="px-10">{cms.bannerText}</span>
+            <span className="px-10">{cms.bannerText}</span>
+          </div>
+        </div>
+      )}
 
       {/* HERO — RESPONSIVE LAYOUT */}
       {/* Mobile: Flex Column (Video top, Text bottom) | Desktop: Block with 100vh height */}
@@ -68,10 +121,10 @@ function Index() {
                 <Leaf className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Indoor Plant Décor & Styling
               </span>
               <h1 className="mt-4 sm:mt-6 font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-tight text-white drop-shadow-lg">
-                Bringing Nature Into Everyday Living
+                {cms.heroTitle}
               </h1>
               <p className="mt-3 sm:mt-6 max-w-xl text-sm sm:text-lg leading-relaxed text-white/85 drop-shadow">
-                Indoor plant styling, balcony makeovers, landscaping, and professional plant wellness services — designed to create elegant, healthy green spaces.
+                {cms.heroSubtitle}
               </p>
               <div className="mt-6 sm:mt-9 flex flex-wrap gap-3">
                 <Link
