@@ -1,70 +1,82 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createFileRoute } from "../lib/router";
 import { PageHeader } from "../components/dashboard/DashboardShell";
-import { useStore, uid } from "../lib/store";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { uploadFile } from "../api";
+import { createGalleryItem, deleteGalleryItem, getAllGalleryItems, uploadFile } from "../api";
 
 const Route = createFileRoute("/admin/gallery")({ component: Page });
 
 function Page() {
-  const [items, setItems] = useStore("gallery", []);
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [d, setD] = useState({ title: "", category: "Indoor Styling", before: "", after: "" });
+  const [d, setD] = useState({ title: "", category: "Indoor Styling", image: "" });
   
-  const [uploadingBefore, setUploadingBefore] = useState(false);
-  const [uploadingAfter, setUploadingAfter] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
-  async function handleUploadBefore(file) {
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    getAllGalleryItems()
+      .then((data) => {
+        if (active) setItems(data.galleryItems);
+      })
+      .catch((err) => toast.error(err.message || "Failed to load gallery"))
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleUploadImage(file) {
     if (!file) return;
-    setUploadingBefore(true);
+    setUploadingImage(true);
     try {
-      const res = await uploadFile(file, "gallery-before");
-      setD((prev) => ({ ...prev, before: res.url }));
-      toast.success("Before image uploaded to Cloudinary");
+      const res = await uploadFile(file, "gallery");
+      setD((prev) => ({ ...prev, image: res.url }));
+      toast.success("Image uploaded to Cloudinary");
     } catch (err) {
-      toast.error(err.message || "Failed to upload before image");
+      toast.error(err.message || "Failed to upload image");
     } finally {
-      setUploadingBefore(false);
+      setUploadingImage(false);
     }
   }
 
-  async function handleUploadAfter(file) {
-    if (!file) return;
-    setUploadingAfter(true);
-    try {
-      const res = await uploadFile(file, "gallery-after");
-      setD((prev) => ({ ...prev, after: res.url }));
-      toast.success("After image uploaded to Cloudinary");
-    } catch (err) {
-      toast.error(err.message || "Failed to upload after image");
-    } finally {
-      setUploadingAfter(false);
-    }
-  }
-
-  function add() {
-    if (!d.title || !d.before || !d.after) {
+  async function add() {
+    if (!d.title || !d.category || !d.image) {
       toast.error("All fields required");
       return;
     }
-    setItems((p) => [{ ...d, id: uid() }, ...p]);
-    toast.success("Added to gallery");
-    setOpen(false);
-    setD({ title: "", category: "Indoor Styling", before: "", after: "" });
+    try {
+      const data = await createGalleryItem(d);
+      setItems((p) => [data.galleryItem, ...p]);
+      toast.success("Added to gallery");
+      setOpen(false);
+      setD({ title: "", category: "Indoor Styling", image: "" });
+    } catch (err) {
+      toast.error(err.message || "Failed to save gallery item");
+    }
   }
 
-  function del(id) {
+  async function del(id) {
     if (!confirm("Delete?")) return;
-    setItems((p) => p.filter((g) => g.id !== id));
+    try {
+      await deleteGalleryItem(id);
+      setItems((p) => p.filter((g) => (g._id || g.id) !== id));
+      toast.success("Deleted from gallery");
+    } catch (err) {
+      toast.error(err.message || "Failed to delete gallery item");
+    }
   }
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Gallery"
-        subtitle="Before / after transformations"
+        subtitle="Manage gallery photos"
         action={
           <button
             onClick={() => setOpen(true)}
@@ -74,33 +86,41 @@ function Page() {
           </button>
         }
       />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {items.map((g) => (
-          <div key={g.id} className="overflow-hidden rounded-2xl border border-border bg-card">
-            <div className="grid grid-cols-2">
-              <img src={g.before} alt="before" className="aspect-square w-full object-cover" />
-              <img src={g.after} alt="after" className="aspect-square w-full object-cover" />
-            </div>
+      {loading ? (
+        <div className="flex h-48 items-center justify-center text-muted-foreground">
+          <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+          Loading gallery...
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {items.map((g) => {
+          const id = g._id || g.id;
+          const image = g.image || g.after || g.before;
+          return (
+          <div key={id} className="overflow-hidden rounded-2xl border border-border bg-card">
+            <img src={image} alt={g.title} className="aspect-square w-full object-cover" />
             <div className="flex items-center justify-between p-4">
               <div>
                 <div className="font-medium">{g.title}</div>
                 <div className="text-xs text-muted-foreground">{g.category}</div>
               </div>
               <button
-                onClick={() => del(g.id)}
+                onClick={() => del(id)}
                 className="rounded-md border border-border p-1.5 text-rose-600 hover:bg-rose-50 cursor-pointer"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
         {items.length === 0 && (
           <div className="col-span-full rounded-2xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">
-            No transformations in gallery. Click Add to create one.
+            No photos in gallery. Click Add to create one.
           </div>
         )}
       </div>
+      )}
 
       {open && (
         <div
@@ -139,48 +159,24 @@ function Page() {
               </div>
 
               <div>
-                <label className="text-xs font-semibold">Before image</label>
+                <label className="text-xs font-semibold">Image</label>
                 <input
                   type="file"
                   accept="image/*"
-                  disabled={uploadingBefore}
-                  onChange={(e) => e.target.files?.[0] && handleUploadBefore(e.target.files[0])}
+                  disabled={uploadingImage}
+                  onChange={(e) => e.target.files?.[0] && handleUploadImage(e.target.files[0])}
                   className="mt-1 w-full text-xs cursor-pointer file:mr-2 file:py-1 file:px-2 file:rounded-md file:border file:border-border file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80"
                 />
-                {uploadingBefore && (
+                {uploadingImage && (
                   <div className="mt-2 flex items-center text-xs text-muted-foreground">
                     <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
                     Uploading to Cloudinary...
                   </div>
                 )}
-                {!uploadingBefore && d.before && (
+                {!uploadingImage && d.image && (
                   <img
-                    src={d.before}
-                    alt="Before preview"
-                    className="mt-2 h-20 w-20 rounded object-cover border border-border"
-                  />
-                )}
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold">After image</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  disabled={uploadingAfter}
-                  onChange={(e) => e.target.files?.[0] && handleUploadAfter(e.target.files[0])}
-                  className="mt-1 w-full text-xs cursor-pointer file:mr-2 file:py-1 file:px-2 file:rounded-md file:border file:border-border file:text-xs file:font-semibold file:bg-secondary file:text-foreground hover:file:bg-secondary/80"
-                />
-                {uploadingAfter && (
-                  <div className="mt-2 flex items-center text-xs text-muted-foreground">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
-                    Uploading to Cloudinary...
-                  </div>
-                )}
-                {!uploadingAfter && d.after && (
-                  <img
-                    src={d.after}
-                    alt="After preview"
+                    src={d.image}
+                    alt="Gallery preview"
                     className="mt-2 h-20 w-20 rounded object-cover border border-border"
                   />
                 )}
@@ -195,7 +191,7 @@ function Page() {
               </button>
               <button
                 onClick={add}
-                disabled={uploadingBefore || uploadingAfter}
+                disabled={uploadingImage}
                 className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground hover:bg-primary/95 disabled:opacity-60 cursor-pointer"
               >
                 Save
