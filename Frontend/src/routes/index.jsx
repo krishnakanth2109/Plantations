@@ -90,11 +90,10 @@ function Index() {
       )}
 
       {/* HERO — RESPONSIVE LAYOUT */}
-      {/* Mobile: Flex Column (Video top, Text bottom) | Desktop: Block with 100vh height */}
-      <section className="relative w-full overflow-hidden bg-[#050505] flex flex-col md:block md:min-h-[100svh]">
+      {/* Mobile: Flex Column with White bg | Desktop: Fullscreen Block with Dark bg */}
+      <section className="relative w-full overflow-hidden bg-background md:bg-[#050505] flex flex-col md:block md:min-h-[100svh]">
 
         {/* Video Container */}
-        {/* Mobile: Fixed 50vh height | Desktop: Absolute inset filling the section */}
         <div className="relative w-full h-[50vh] sm:h-[60vh] md:h-full md:absolute md:inset-0 z-0 shrink-0">
           <video
             autoPlay
@@ -108,24 +107,31 @@ function Index() {
           </video>
 
           {/* Gradient Overlay */}
-          {/* Mobile: Fades black at the bottom to blend with text | Desktop: Full dark overlay for text readability */}
-          <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#050505] via-[#050505]/40 to-transparent md:bg-gradient-to-b md:from-black/60 md:via-black/40 md:to-black/70" />
+          {/* Mobile: Fades to white at the bottom | Desktop: Full dark overlay for text readability */}
+          <div className="absolute inset-0 z-10 bg-gradient-to-t from-background via-background/20 to-transparent md:bg-gradient-to-b md:from-black/60 md:via-black/40 md:to-black/70" />
         </div>
 
         {/* Hero Content */}
-        {/* Mobile: Flex item taking bottom space | Desktop: Absolute positioned centered overlay */}
         <div className="relative z-20 flex flex-1 items-center md:absolute md:inset-0 md:pointer-events-none">
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 md:py-0 md:pointer-events-auto">
             <div className="max-w-2xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-white backdrop-blur">
+              
+              {/* Tag / Badge */}
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 sm:px-4 sm:py-1.5 text-[10px] sm:text-xs font-medium uppercase tracking-widest text-primary backdrop-blur md:border-white/20 md:bg-white/10 md:text-white">
                 <Leaf className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Indoor Plant Décor & Styling
               </span>
-              <h1 className="mt-4 sm:mt-6 font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-tight text-white drop-shadow-lg">
+              
+              {/* Main Heading (Orange on Mobile, White on Desktop) */}
+              <h1 className="mt-4 sm:mt-6 font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-medium leading-tight text-primary md:text-white drop-shadow-none md:drop-shadow-lg">
                 {cms.heroTitle}
               </h1>
-              <p className="mt-3 sm:mt-6 max-w-xl text-sm sm:text-lg leading-relaxed text-white/85 drop-shadow">
+              
+              {/* Subtitle (Dark Gray on Mobile, White on Desktop) */}
+              <p className="mt-3 sm:mt-6 max-w-xl text-sm sm:text-lg leading-relaxed text-foreground/80 md:text-white/85 drop-shadow-none md:drop-shadow">
                 {cms.heroSubtitle}
               </p>
+              
+              {/* Call to Action Buttons */}
               <div className="mt-6 sm:mt-9 flex flex-wrap gap-3">
                 <Link
                   to="/contact"
@@ -135,7 +141,7 @@ function Index() {
                 </Link>
                 <Link
                   to="/services"
-                  className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-5 py-3 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-medium text-white backdrop-blur hover:bg-white/20"
+                  className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-background/50 px-5 py-3 sm:px-7 sm:py-3.5 text-xs sm:text-sm font-medium text-primary backdrop-blur hover:bg-secondary md:border-white/30 md:bg-white/10 md:text-white md:hover:bg-white/20 transition"
                 >
                   Explore Services
                 </Link>
