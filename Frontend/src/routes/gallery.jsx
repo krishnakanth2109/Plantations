@@ -1,12 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { createFileRoute } from "../lib/router";
 import { SiteLayout } from "../components/site/SiteLayout";
-import indoor from "../assets/indoor.jpg";
-import balcony from "../assets/balcony.jpg";
-import landscape from "../assets/landscape.jpg";
-import wellness from "../assets/wellness.jpg";
-import about from "../assets/about.jpg";
-import hero from "../assets/hero.jpg";
+import { Loader2 } from "lucide-react";
+import { getGalleryItems } from "../api";
+import { toast } from "sonner";
 const Route = createFileRoute("/gallery")({
   head: () => ({
     meta: [
@@ -16,32 +13,58 @@ const Route = createFileRoute("/gallery")({
   }),
   component: Gallery
 });
-const items = [
-  { img: hero, t: "Sunlit Living Room", c: "Indoor Styling" },
-  { img: balcony, t: "Cozy Balcony Retreat", c: "Balcony Makeover" },
-  { img: indoor, t: "Modern Office Plants", c: "Commercial" },
-  { img: landscape, t: "Villa Front Lawn", c: "Landscaping" },
-  { img: wellness, t: "Plant Recovery", c: "Wellness" },
-  { img: about, t: "Curated Pot Display", c: "Styling" }
-];
 function Gallery() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    getGalleryItems()
+      .then((data) => {
+        if (active) setItems(data.galleryItems);
+      })
+      .catch((err) => toast.error(err.message || "Failed to load gallery"))
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return <SiteLayout>
       <section className="mx-auto max-w-7xl px-6 py-16 md:py-24">
         <p className="text-sm font-medium uppercase tracking-widest text-primary/80">Gallery</p>
-        <h1 className="mt-2 font-display text-5xl text-primary md:text-6xl">Before & after transformations</h1>
-        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">Ordinary spaces transformed into refreshing green environments through thoughtful plant styling.</p>
+        <h1 className="mt-2 font-display text-5xl text-primary md:text-6xl">Green spaces gallery</h1>
+        <p className="mt-4 max-w-2xl text-lg text-muted-foreground">Homes, offices, balconies and gardens refreshed through thoughtful plant styling.</p>
 
-        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((i, idx) => <figure key={idx} className="group overflow-hidden rounded-2xl border border-border bg-card">
-              <div className="aspect-[4/5] overflow-hidden">
-                <img src={i.img} alt={i.t} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+        {loading ? (
+          <div className="mt-14 flex h-64 items-center justify-center text-muted-foreground">
+            <Loader2 className="mr-2 h-7 w-7 animate-spin" />
+            Loading gallery...
+          </div>
+        ) : (
+          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((i) => {
+              const image = i.image || i.after || i.before;
+              return <figure key={i._id || i.id} className="group overflow-hidden rounded-2xl border border-border bg-card transition hover:-translate-y-1 hover:shadow-xl">
+              <div className="aspect-[4/3] overflow-hidden">
+                <img src={image} alt={i.title} loading="lazy" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
               </div>
-              <figcaption className="p-5">
-                <p className="text-xs font-medium uppercase tracking-widest text-primary/70">{i.c}</p>
-                <p className="mt-1 font-display text-lg">{i.t}</p>
+              <figcaption className="p-6">
+                <p className="text-xs font-medium uppercase tracking-widest text-primary/70">{i.category}</p>
+                <p className="mt-2 font-display text-2xl">{i.title}</p>
               </figcaption>
-            </figure>)}
-        </div>
+            </figure>;
+            })}
+            {items.length === 0 && (
+              <div className="col-span-full rounded-2xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">
+                No gallery transformations have been added yet.
+              </div>
+            )}
+          </div>
+        )}
       </section>
     </SiteLayout>;
 }

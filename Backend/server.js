@@ -17,6 +17,7 @@ import wishlistRoutes from "./routes/wishlistRoutes.js";
 import customerRoutes from "./routes/customerRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import cmsRoutes from "./routes/cmsRoutes.js";
+import galleryRoutes from "./routes/galleryRoutes.js";
 
 dotenv.config();
 
@@ -64,6 +65,7 @@ app.use("/api/uploads", uploadRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/cms", cmsRoutes);
+app.use("/api/gallery", galleryRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
@@ -93,4 +95,3 @@ connectDB()
     console.error("Failed to start API server:", error.message);
     process.exit(1);
   });
-

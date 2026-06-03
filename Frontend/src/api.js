@@ -121,6 +121,10 @@ const deleteNotification = async (id) => (await api.delete(`/api/notifications/$
 const resolveSubscriptionUpgrade = async (id, action) => (await api.patch(`/api/subscriptions/${id}/upgrade-resolve`, { action })).data;
 const getCms = async () => (await api.get("/api/cms")).data;
 const updateCms = async (data) => (await api.post("/api/cms", data)).data;
+const getGalleryItems = async () => (await api.get("/api/gallery")).data;
+const getAllGalleryItems = async () => (await api.get("/api/gallery/admin")).data;
+const createGalleryItem = async (data) => (await api.post("/api/gallery", data)).data;
+const deleteGalleryItem = async (id) => (await api.delete(`/api/gallery/${id}`)).data;
 var stdin_default = api;
 export {
   addWishlistItem,
@@ -189,5 +193,9 @@ export {
   deleteNotification,
   resolveSubscriptionUpgrade,
   getCms,
-  updateCms
+  updateCms,
+  getGalleryItems,
+  getAllGalleryItems,
+  createGalleryItem,
+  deleteGalleryItem
 };
