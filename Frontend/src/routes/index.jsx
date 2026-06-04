@@ -42,7 +42,7 @@ function Index() {
     bannerActive: false,
     bannerText: ""
   });
-
+ 
   useEffect(() => {
     getCms()
       .then((data) => {
