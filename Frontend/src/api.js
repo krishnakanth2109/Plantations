@@ -10,7 +10,7 @@ api.interceptors.request.use(
     const token = sessionStorage.getItem("yp_auth_token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-    }
+    } 
     return config;
   },
   (error) => Promise.reject(error)
