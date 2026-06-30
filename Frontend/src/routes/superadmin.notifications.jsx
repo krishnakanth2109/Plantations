@@ -6,7 +6,7 @@ import { getMyNotifications, markAllNotificationsRead, markNotificationRead, del
 import { useSocket } from "../hooks/useSocket";
 import { toast } from "sonner";
 
-const Route = createFileRoute("/admin/notifications")({ component: Page });
+const Route = createFileRoute("/superadmin/notifications")({ component: Page });
 
 function Page() {
   const [items, setItems] = useState([]);

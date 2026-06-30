@@ -12,7 +12,7 @@ const seed = [
   { id: uid(), name: "Organic Fertilizer", category: "Care", stock: 4, unit: "kg", price: 320 },
   { id: uid(), name: "Neem Oil Spray", category: "Care", stock: 2, unit: "btl", price: 280 }
 ];
-const Route = createFileRoute("/admin/inventory")({ component: Page });
+const Route = createFileRoute("/superadmin/inventory")({ component: Page });
 function Page() {
   const [items, setItems] = useStore("inventory", seed);
   const [open, setOpen] = useState(false);

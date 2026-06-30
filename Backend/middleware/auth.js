@@ -23,6 +23,10 @@ export async function requireAuth(req, res, next) {
       return res.status(401).json({ message: "User no longer exists" });
     }
 
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Account is deactivated" });
+    }
+
     if (!user.firebaseUid) {
       user.firebaseUid = decoded.uid;
       await user.save();
@@ -41,8 +45,15 @@ export async function requireAuth(req, res, next) {
 }
 
 export function requireAdmin(req, res, next) {
-  if (req.user?.role !== "admin") {
+  if (req.user?.role !== "superadmin" && req.user?.role !== "admin") {
     return res.status(403).json({ message: "Admin access required" });
+  }
+  next();
+}
+
+export function requireSuperadmin(req, res, next) {
+  if (req.user?.role !== "superadmin") {
+    return res.status(403).json({ message: "Superadmin access required" });
   }
   next();
 }

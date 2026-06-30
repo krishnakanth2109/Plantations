@@ -82,14 +82,14 @@ async function findOrCreateMongoUser(firebaseUser, defaults = {}) {
 
 async function sendAuth(res, user, firebaseSession, status = 200) {
   try {
-    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const fifteenMinsMs = 15 * 60 * 1000;
     const sessionCookie = await firebaseAdmin.auth().createSessionCookie(firebaseSession.idToken, {
-      expiresIn: threeDaysMs,
+      expiresIn: fifteenMinsMs,
     });
     return res.status(status).json({
       token: sessionCookie,
       refreshToken: firebaseSession.refreshToken,
-      expiresIn: 3 * 24 * 3600,
+      expiresIn: 15 * 60,
       user: user.toAuthJSON(),
     });
   } catch (error) {
@@ -159,6 +159,10 @@ export async function login(req, res, next) {
     const firebaseUser = await firebaseAdmin.auth().getUser(firebaseSession.localId);
     const user = await findOrCreateMongoUser(firebaseUser);
 
+    if (user.isActive === false) {
+      return res.status(403).json({ message: "Your account is deactivated. Please contact support." });
+    }
+
     return await sendAuth(res, user, firebaseSession);
   } catch (error) {
     next(error);
@@ -220,6 +224,45 @@ export async function me(req, res, next) {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
+
+    return res.json({ user: user.toAuthJSON() });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateProfile(req, res, next) {
+  try {
+    const { name, phone, address, password } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const firebaseUpdates = {};
+    if (name) firebaseUpdates.displayName = name;
+    if (password) {
+      if (password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+      firebaseUpdates.password = password;
+    }
+
+    if (user.firebaseUid && Object.keys(firebaseUpdates).length > 0) {
+      try {
+        await firebaseAdmin.auth().updateUser(user.firebaseUid, firebaseUpdates);
+      } catch (err) {
+        console.error("Failed to update Firebase user data during profile edit:", err.message);
+        return res.status(500).json({ message: "Failed to update auth server details: " + err.message });
+      }
+    }
+
+    if (name) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (address !== undefined) user.address = address;
+
+    await user.save();
 
     return res.json({ user: user.toAuthJSON() });
   } catch (error) {

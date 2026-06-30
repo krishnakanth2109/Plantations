@@ -10,7 +10,7 @@ const seed = [
   { id: uid(), code: "WELCOME500", discount: 500, type: "\u20B9", expires: "2026-08-31", uses: 38, max: 200, active: true },
   { id: uid(), code: "MONSOON10", discount: 10, type: "%", expires: "2026-09-15", uses: 5, max: 50, active: false }
 ];
-const Route = createFileRoute("/admin/coupons")({ component: Page });
+const Route = createFileRoute("/superadmin/coupons")({ component: Page });
 function Page() {
   const [items, setItems] = useStore("coupons", seed);
   const [open, setOpen] = useState(false);

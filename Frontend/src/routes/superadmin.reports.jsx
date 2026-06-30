@@ -5,7 +5,7 @@ import { getAllBookings, getAllPayments, getAllSubscriptions, getLeads } from ".
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, PieChart, Pie, Cell, Legend } from "recharts";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
-const Route = createFileRoute("/admin/reports")({ component: Page });
+const Route = createFileRoute("/superadmin/reports")({ component: Page });
 const COLORS = ["var(--primary)", "var(--accent)", "#a8c0a0", "#7d9b76", "#5a8a5c"];
 function Page() {
   const [bookings, setBookings] = useState([]);

@@ -9,7 +9,7 @@ const seed = [
   { id: uid(), title: "5 indoor plants that purify the air", category: "Care Tips", excerpt: "Snake plant, peace lily and more.", body: "Full article body\u2026", date: "2026-05-10", published: true },
   { id: uid(), title: "Monsoon plant care checklist", category: "Seasonal", excerpt: "Protect plants from overwatering this season.", body: "\u2026", date: "2026-04-22", published: true }
 ];
-const Route = createFileRoute("/admin/blog")({ component: Page });
+const Route = createFileRoute("/superadmin/blog")({ component: Page });
 function Page() {
   const [items, setItems] = useStore("blog", seed);
   const [editing, setEditing] = useState(null);

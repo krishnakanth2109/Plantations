@@ -15,7 +15,7 @@ function getSeedProjects() {
     { id: uid(), name: "Jubilee Hills Balcony", customer: "Priya Reddy", type: "Balcony Makeover", start: "2026-05-10", due: "2026-05-22", progress: 100, status: "Completed" }
   ];
 }
-const Route = createFileRoute("/admin/projects")({ component: Page });
+const Route = createFileRoute("/superadmin/projects")({ component: Page });
 function Page() {
   const [items, setItems] = useStore("projects", getSeedProjects());
   const [open, setOpen] = useState(false);

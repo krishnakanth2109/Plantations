@@ -4,7 +4,7 @@ import { PageHeader, Badge, statusTone } from "../components/dashboard/Dashboard
 import { toast } from "sonner";
 import { getAllBookings, updateBookingStatus } from "../api";
 
-const Route = createFileRoute("/admin/bookings")({ component: Page });
+const Route = createFileRoute("/superadmin/bookings")({ component: Page });
 const statuses = ["Pending", "Approved", "Scheduled", "Ongoing", "Completed", "Cancelled"];
 
 function mapBooking(booking) {

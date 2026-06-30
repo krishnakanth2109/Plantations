@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     phone: { type: String, default: "" },
     address: { type: String, default: "" },
-    role: { type: String, enum: ["admin", "customer"], default: "customer" },
+    role: { type: String, enum: ["superadmin", "admin", "customer"], default: "customer" },
+    isActive: { type: Boolean, default: true, required: true },
     tag: { type: String, enum: ["VIP", "Repeat", "Commercial", "Homeowner"], default: "Homeowner" },
     joinedAt: { type: Date, default: Date.now },
   },
@@ -23,6 +24,7 @@ userSchema.methods.toAuthJSON = function toAuthJSON() {
     phone: this.phone,
     address: this.address,
     role: this.role,
+    isActive: this.isActive,
     tag: this.tag,
     joinedAt: this.joinedAt,
   };

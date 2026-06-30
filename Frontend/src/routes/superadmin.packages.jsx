@@ -11,7 +11,7 @@ const seed = [
   { id: uid(), name: "Partial Maintenance", service: "Maintenance", price: 2500, duration: "Monthly", includes: "Bi-monthly visits, basic care", active: true },
   { id: uid(), name: "Fully Customized Care", service: "Maintenance", price: 4500, duration: "Monthly", includes: "Weekly visits, full care, replacements", active: true }
 ];
-const Route = createFileRoute("/admin/packages")({ component: Page });
+const Route = createFileRoute("/superadmin/packages")({ component: Page });
 function Page() {
   const [items, setItems] = useStore("packages", seed);
   const [open, setOpen] = useState(false);

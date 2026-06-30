@@ -69,7 +69,7 @@ subscriptionRouter.post("/", requireAuth, async (req, res, next) => {
     const planDoc = planId ? await MaintenancePlan.findById(planId) : null;
     if (planId && !planDoc) return res.status(404).json({ message: "Maintenance plan not found" });
 
-    const targetCustomerId = req.user.role === "admin" && customerId ? customerId : req.user.id;
+    const targetCustomerId = req.user.role === "superadmin" && customerId ? customerId : req.user.id;
     
     // Find if there is an existing active or pending subscription for this customer
     const existingSubscription = await Subscription.findOne({ 
@@ -96,26 +96,26 @@ subscriptionRouter.post("/", requireAuth, async (req, res, next) => {
         await existingSubscription.save();
         await existingSubscription.populate(subscriptionPopulate);
 
-        // Notify admins about the upgrade/change request
+        // Notify superadmins about the upgrade/change request
         const user = await User.findById(targetCustomerId);
-        const admins = await User.find({ role: "admin" }).select("_id");
+        const superadmins = await User.find({ role: { $in: ["superadmin", "admin"] }, isActive: { $ne: false } }).select("_id");
         const isUpgrade = planName === "Fully Customized";
         const actionVerb = isUpgrade ? "upgrade" : "change";
         const requestTitle = isUpgrade ? "Plan Upgrade Requested" : "Plan Change Requested";
-        if (admins.length > 0) {
-          const adminNotifications = await Notification.insertMany(
-            admins.map((admin) => ({
-              userId: admin._id,
+        if (superadmins.length > 0) {
+          const superadminNotifications = await Notification.insertMany(
+            superadmins.map((superadmin) => ({
+              userId: superadmin._id,
               title: requestTitle,
               body: `${user?.name || "A customer"} requested to ${actionVerb} from the ${existingSubscription.plan} Plan to the ${planName} Plan.`,
               type: "subscription",
               refId: existingSubscription._id,
             }))
           );
-          if (adminNotifications.length > 0) {
+          if (superadminNotifications.length > 0) {
             const { getIO } = await import("../config/socket.js");
             const io = getIO();
-            if (io) io.to("admin").emit("notification", adminNotifications[0]);
+            if (io) io.to("superadmin").emit("notification", superadminNotifications[0]);
           }
         }
 
@@ -212,7 +212,7 @@ subscriptionRouter.delete("/:id", requireAuth, async (req, res, next) => {
     const subscription = await Subscription.findById(req.params.id);
     if (!subscription) return res.status(404).json({ message: "Subscription not found" });
 
-    if (subscription.customerId.toString() !== req.user.id && req.user.role !== "admin") {
+    if (subscription.customerId.toString() !== req.user.id && req.user.role !== "superadmin") {
       return res.status(403).json({ message: "Unauthorized to delete this subscription" });
     }
 

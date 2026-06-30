@@ -46,12 +46,12 @@ router.post("/", requireAuth, async (req, res, next) => {
     const io = getIO();
     if (io) io.to(req.user.id.toString()).emit("notification", customerNotification);
 
-    // Also notify all admins about the new booking
-    const admins = await User.find({ role: "admin" }).select("_id");
-    if (admins.length > 0) {
-      const adminNotifications = await Notification.insertMany(
-        admins.map((admin) => ({
-          userId: admin._id,
+    // Also notify all superadmins about the new booking
+    const superadmins = await User.find({ role: { $in: ["superadmin", "admin"] }, isActive: { $ne: false } }).select("_id");
+    if (superadmins.length > 0) {
+      const superadminNotifications = await Notification.insertMany(
+        superadmins.map((superadmin) => ({
+          userId: superadmin._id,
           title: "New booking received",
           body: `${req.user.name || "A customer"} booked ${booking.serviceType} for ${new Date(booking.date).toLocaleDateString("en-IN")}.`,
           type: "booking",
@@ -59,9 +59,9 @@ router.post("/", requireAuth, async (req, res, next) => {
         }))
       );
       // Send real-time notification to the admin room (take first one as representative or just emit a generic event)
-      if (adminNotifications.length > 0) {
+      if (superadminNotifications.length > 0) {
         const io = getIO();
-        if (io) io.to("admin").emit("notification", adminNotifications[0]);
+        if (io) io.to("superadmin").emit("notification", superadminNotifications[0]);
       }
     }
 
@@ -103,21 +103,21 @@ router.patch("/:id/cancel", requireAuth, async (req, res, next) => {
     const io = getIO();
     if (io) io.to(req.user.id.toString()).emit("notification", customerNotification);
 
-    // Notify admins about the cancellation
-    const admins = await User.find({ role: "admin" }).select("_id");
-    if (admins.length > 0) {
-      const adminNotifications = await Notification.insertMany(
-        admins.map((admin) => ({
-          userId: admin._id,
+    // Notify superadmins about the cancellation
+    const superadmins = await User.find({ role: { $in: ["superadmin", "admin"] }, isActive: { $ne: false } }).select("_id");
+    if (superadmins.length > 0) {
+      const superadminNotifications = await Notification.insertMany(
+        superadmins.map((superadmin) => ({
+          userId: superadmin._id,
           title: "Booking cancelled by customer",
           body: `${req.user.name || "A customer"} cancelled their ${booking.serviceType} booking.`,
           type: "booking",
           refId: booking._id,
         }))
       );
-      if (adminNotifications.length > 0) {
+      if (superadminNotifications.length > 0) {
         const io = getIO();
-        if (io) io.to("admin").emit("notification", adminNotifications[0]);
+        if (io) io.to("superadmin").emit("notification", superadminNotifications[0]);
       }
     }
 

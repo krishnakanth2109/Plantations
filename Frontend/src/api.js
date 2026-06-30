@@ -122,9 +122,15 @@ const resolveSubscriptionUpgrade = async (id, action) => (await api.patch(`/api/
 const getCms = async () => (await api.get("/api/cms")).data;
 const updateCms = async (data) => (await api.post("/api/cms", data)).data;
 const getGalleryItems = async () => (await api.get("/api/gallery")).data;
-const getAllGalleryItems = async () => (await api.get("/api/gallery/admin")).data;
+const getAllGalleryItems = async () => (await api.get("/api/gallery/superadmin")).data;
 const createGalleryItem = async (data) => (await api.post("/api/gallery", data)).data;
 const deleteGalleryItem = async (id) => (await api.delete(`/api/gallery/${id}`)).data;
+const getAdmins = async () => (await api.get("/api/superadmin/admins")).data;
+const createAdmin = async (data) => (await api.post("/api/superadmin/admins", data)).data;
+const toggleAdminStatus = async (id, isActive) => (await api.patch(`/api/superadmin/admins/${id}/status`, { isActive })).data;
+const deleteAdmin = async (id) => (await api.delete(`/api/superadmin/admins/${id}`)).data;
+const updateAdmin = async (id, data) => (await api.put(`/api/superadmin/admins/${id}`, data)).data;
+const updateProfile = async (data) => (await api.put("/api/auth/profile", data)).data;
 var stdin_default = api;
 export {
   addWishlistItem,
@@ -197,5 +203,11 @@ export {
   getGalleryItems,
   getAllGalleryItems,
   createGalleryItem,
-  deleteGalleryItem
+  deleteGalleryItem,
+  getAdmins,
+  createAdmin,
+  toggleAdminStatus,
+  deleteAdmin,
+  updateAdmin,
+  updateProfile
 };

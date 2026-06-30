@@ -5,7 +5,7 @@ import { Plus, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { createGalleryItem, deleteGalleryItem, getAllGalleryItems, uploadFile } from "../api";
 
-const Route = createFileRoute("/admin/gallery")({ component: Page });
+const Route = createFileRoute("/superadmin/gallery")({ component: Page });
 
 function Page() {
   const [items, setItems] = useState([]);

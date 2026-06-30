@@ -35,9 +35,9 @@ export const initSocket = (server, allowedOrigins) => {
           // Join user's personal room
           socket.join(userId);
           
-          // If user is admin, join admin room
-          if (role === "admin") {
-            socket.join("admin");
+          // If user is superadmin or admin, join superadmin room
+          if (role === "superadmin" || role === "admin") {
+            socket.join("superadmin");
           }
 
           console.log(`Socket connected: User ${userId} (${role}) joined rooms: ${[...socket.rooms]}`);

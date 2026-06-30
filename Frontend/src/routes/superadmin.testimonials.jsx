@@ -5,7 +5,7 @@ import { approveReview, deleteReview, getAllReviews } from "../api";
 import { Star, Check, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-const Route = createFileRoute("/admin/testimonials")({ component: Page });
+const Route = createFileRoute("/superadmin/testimonials")({ component: Page });
 
 function Page() {
   const [items, setItems] = useState([]);

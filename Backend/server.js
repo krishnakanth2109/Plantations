@@ -18,6 +18,7 @@ import customerRoutes from "./routes/customerRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import cmsRoutes from "./routes/cmsRoutes.js";
 import galleryRoutes from "./routes/galleryRoutes.js";
+import superadminRoutes from "./routes/superadminRoutes.js";
 
 dotenv.config();
 
@@ -66,6 +67,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/cms", cmsRoutes);
 app.use("/api/gallery", galleryRoutes);
+app.use("/api/superadmin/admins", superadminRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });

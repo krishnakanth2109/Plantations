@@ -84,7 +84,7 @@ export async function seedDatabase({ log = false } = {}) {
     email: seedUsers.admin.email,
     phone: "+91 88974 84114",
     address: "Hyderabad, India",
-    role: "admin",
+    role: "superadmin",
     tag: "VIP",
     joinedAt: new Date("2025-08-01"),
   });

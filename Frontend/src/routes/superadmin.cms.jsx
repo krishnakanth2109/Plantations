@@ -14,7 +14,7 @@ const init = {
   bannerActive: false,
   bannerText: "Monsoon offer: 20% off all maintenance plans \u2014 use code GREEN20"
 };
-const Route = createFileRoute("/admin/cms")({ component: Page });
+const Route = createFileRoute("/superadmin/cms")({ component: Page });
 function Page() {
   const [c, setC] = useState(init);
   const [loading, setLoading] = useState(true);

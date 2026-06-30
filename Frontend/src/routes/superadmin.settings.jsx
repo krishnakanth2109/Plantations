@@ -3,7 +3,7 @@ import { createFileRoute } from "../lib/router";
 import { PageHeader } from "../components/dashboard/DashboardShell";
 import { useStore } from "../lib/store";
 import { toast } from "sonner";
-const Route = createFileRoute("/admin/settings")({ component: Page });
+const Route = createFileRoute("/superadmin/settings")({ component: Page });
 function Page() {
   const [s, setS] = useStore("settings", { businessName: "Yogini Planters", phone: "", email: "", instagram: "", address: "" });
   return <div className="space-y-6">

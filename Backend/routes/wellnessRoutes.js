@@ -34,21 +34,21 @@ router.post("/", requireAuth, async (req, res, next) => {
     const io = getIO();
     if (io) io.to(req.user.id.toString()).emit("notification", customerNotification);
 
-    // Notify admins about the new wellness ticket
-    const admins = await User.find({ role: "admin" }).select("_id");
-    if (admins.length > 0) {
-      const adminNotifications = await Notification.insertMany(
-        admins.map((admin) => ({
-          userId: admin._id,
+    // Notify superadmins about the new wellness ticket
+    const superadmins = await User.find({ role: { $in: ["superadmin", "admin"] }, isActive: { $ne: false } }).select("_id");
+    if (superadmins.length > 0) {
+      const superadminNotifications = await Notification.insertMany(
+        superadmins.map((superadmin) => ({
+          userId: superadmin._id,
           title: "New wellness ticket",
           body: `${req.user.name || "A customer"} opened a wellness ticket: "${issue.slice(0, 40)}${issue.length > 40 ? "..." : ""}"`,
           type: "wellness",
           refId: ticket._id,
         }))
       );
-      if (adminNotifications.length > 0) {
+      if (superadminNotifications.length > 0) {
         const io = getIO();
-        if (io) io.to("admin").emit("notification", adminNotifications[0]);
+        if (io) io.to("superadmin").emit("notification", superadminNotifications[0]);
       }
     }
 
@@ -170,7 +170,7 @@ router.delete("/:id", requireAuth, async (req, res, next) => {
     const ticket = await Ticket.findById(req.params.id);
     if (!ticket) return res.status(404).json({ message: "Wellness ticket not found" });
 
-    if (ticket.customerId.toString() !== req.user.id && req.user.role !== "admin") {
+    if (ticket.customerId.toString() !== req.user.id && req.user.role !== "superadmin") {
       return res.status(403).json({ message: "Unauthorized to delete this ticket" });
     }
 

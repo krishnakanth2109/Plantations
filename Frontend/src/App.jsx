@@ -31,28 +31,30 @@ import { Route as DashboardSupportRoute } from "./routes/dashboard.support";
 import { Route as DashboardWellnessRoute } from "./routes/dashboard.wellness";
 import { Route as DashboardWishlistRoute } from "./routes/dashboard.wishlist";
 
-import { Route as AdminRoute } from "./routes/admin";
-import { Route as AdminIndexRoute } from "./routes/admin.index";
-import { Route as AdminBlogRoute } from "./routes/admin.blog";
-import { Route as AdminBookingsRoute } from "./routes/admin.bookings";
-import { Route as AdminCmsRoute } from "./routes/admin.cms";
-import { Route as AdminConsultationsRoute } from "./routes/admin.consultations";
-import { Route as AdminCouponsRoute } from "./routes/admin.coupons";
-import { Route as AdminCustomersRoute } from "./routes/admin.customers";
-import { Route as AdminGalleryRoute } from "./routes/admin.gallery";
-import { Route as AdminInventoryRoute } from "./routes/admin.inventory";
-import { Route as AdminLeadsRoute } from "./routes/admin.leads";
-import { Route as AdminNotificationsRoute } from "./routes/admin.notifications";
-import { Route as AdminPackagesRoute } from "./routes/admin.packages";
-import { Route as AdminPaymentsRoute } from "./routes/admin.payments";
-import { Route as AdminProjectsRoute } from "./routes/admin.projects";
-import { Route as AdminReportsRoute } from "./routes/admin.reports";
-import { Route as AdminSettingsRoute } from "./routes/admin.settings";
-import { Route as AdminStaffRoute } from "./routes/admin.staff";
-import { Route as AdminSubscriptionsRoute } from "./routes/admin.subscriptions";
-import { Route as AdminTestimonialsRoute } from "./routes/admin.testimonials";
-import { Route as AdminWellnessRoute } from "./routes/admin.wellness";
-import { Route as AdminMaintenancePlansRoute } from "./routes/admin.maintenance-plans";
+import { Route as SuperadminRoute } from "./routes/superadmin";
+import { Route as SuperadminIndexRoute } from "./routes/superadmin.index";
+import { Route as SuperadminAdminsRoute } from "./routes/superadmin.admins";
+import { Route as SuperadminProfileRoute } from "./routes/superadmin.profile";
+import { Route as SuperadminBlogRoute } from "./routes/superadmin.blog";
+import { Route as SuperadminBookingsRoute } from "./routes/superadmin.bookings";
+import { Route as SuperadminCmsRoute } from "./routes/superadmin.cms";
+import { Route as SuperadminConsultationsRoute } from "./routes/superadmin.consultations";
+import { Route as SuperadminCouponsRoute } from "./routes/superadmin.coupons";
+import { Route as SuperadminCustomersRoute } from "./routes/superadmin.customers";
+import { Route as SuperadminGalleryRoute } from "./routes/superadmin.gallery";
+import { Route as SuperadminInventoryRoute } from "./routes/superadmin.inventory";
+import { Route as SuperadminLeadsRoute } from "./routes/superadmin.leads";
+import { Route as SuperadminNotificationsRoute } from "./routes/superadmin.notifications";
+import { Route as SuperadminPackagesRoute } from "./routes/superadmin.packages";
+import { Route as SuperadminPaymentsRoute } from "./routes/superadmin.payments";
+import { Route as SuperadminProjectsRoute } from "./routes/superadmin.projects";
+import { Route as SuperadminReportsRoute } from "./routes/superadmin.reports";
+import { Route as SuperadminSettingsRoute } from "./routes/superadmin.settings";
+import { Route as SuperadminStaffRoute } from "./routes/superadmin.staff";
+import { Route as SuperadminSubscriptionsRoute } from "./routes/superadmin.subscriptions";
+import { Route as SuperadminTestimonialsRoute } from "./routes/superadmin.testimonials";
+import { Route as SuperadminWellnessRoute } from "./routes/superadmin.wellness";
+import { Route as SuperadminMaintenancePlansRoute } from "./routes/superadmin.maintenance-plans";
 
 const publicRoutes = [
   HomeRoute,
@@ -85,28 +87,30 @@ const dashboardRoutes = [
   DashboardWishlistRoute,
 ];
 
-const adminRoutes = [
-  AdminIndexRoute,
-  AdminBlogRoute,
-  AdminBookingsRoute,
-  AdminCmsRoute,
-  AdminConsultationsRoute,
-  AdminCouponsRoute,
-  AdminCustomersRoute,
-  AdminGalleryRoute,
-  AdminInventoryRoute,
-  AdminLeadsRoute,
-  AdminNotificationsRoute,
-  AdminPackagesRoute,
-  AdminPaymentsRoute,
-  AdminProjectsRoute,
-  AdminReportsRoute,
-  AdminSettingsRoute,
-  AdminStaffRoute,
-  AdminSubscriptionsRoute,
-  AdminTestimonialsRoute,
-  AdminWellnessRoute,
-  AdminMaintenancePlansRoute,
+const superadminRoutes = [
+  SuperadminIndexRoute,
+  SuperadminAdminsRoute,
+  SuperadminProfileRoute,
+  SuperadminBlogRoute,
+  SuperadminBookingsRoute,
+  SuperadminCmsRoute,
+  SuperadminConsultationsRoute,
+  SuperadminCouponsRoute,
+  SuperadminCustomersRoute,
+  SuperadminGalleryRoute,
+  SuperadminInventoryRoute,
+  SuperadminLeadsRoute,
+  SuperadminNotificationsRoute,
+  SuperadminPackagesRoute,
+  SuperadminPaymentsRoute,
+  SuperadminProjectsRoute,
+  SuperadminReportsRoute,
+  SuperadminSettingsRoute,
+  SuperadminStaffRoute,
+  SuperadminSubscriptionsRoute,
+  SuperadminTestimonialsRoute,
+  SuperadminWellnessRoute,
+  SuperadminMaintenancePlansRoute,
 ];
 
 function NotFound() {
@@ -144,11 +148,11 @@ function App() {
         </Route>
 
         {/* Admin Routes (Nested) */}
-        <Route path="/admin" element={<AdminRoute.component />}>
-          <Route index element={<AdminIndexRoute.component />} />
-          {adminRoutes.filter(r => r.path !== "/admin").map((route) => {
+        <Route path="/superadmin" element={<SuperadminRoute.component />}>
+          <Route index element={<SuperadminIndexRoute.component />} />
+          {superadminRoutes.filter(r => r.path !== "/superadmin").map((route) => {
             const Component = route.component;
-            const relativePath = route.path.replace(/^\/admin\//, "");
+            const relativePath = route.path.replace(/^\/superadmin\//, "");
             return <Route key={route.path} path={relativePath} element={<Component />} />;
           })}
         </Route>

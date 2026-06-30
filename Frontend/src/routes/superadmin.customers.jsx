@@ -5,7 +5,7 @@ import { Plus, Trash2, Pencil, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { getCustomers, createCustomer, updateCustomer, deleteCustomer } from "../api";
 
-const Route = createFileRoute("/admin/customers")({ component: Page });
+const Route = createFileRoute("/superadmin/customers")({ component: Page });
 const empty = { id: "", name: "", email: "", phone: "", address: "", tag: "Homeowner" };
 
 const formatDate = (dateStr) => {

@@ -5,7 +5,7 @@ import { diagnoseWellnessTicket, getAllWellnessTickets, resolveWellnessTicket, d
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-const Route = createFileRoute("/admin/wellness")({ component: Page });
+const Route = createFileRoute("/superadmin/wellness")({ component: Page });
 
 function mapTicket(ticket) {
   return {
@@ -24,7 +24,7 @@ function Page() {
   const [loading, setLoading] = useState(false);
 
   async function handleDelete(id) {
-    if (!confirm("Are you sure you want to delete this wellness ticket as an admin?")) return;
+    if (!confirm("Are you sure you want to delete this wellness ticket as an superadmin?")) return;
     try {
       await deleteWellnessTicket(id);
       setItems((prev) => prev.filter((t) => t.id !== id));

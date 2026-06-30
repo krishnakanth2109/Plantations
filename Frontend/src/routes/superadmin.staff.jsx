@@ -10,7 +10,7 @@ const seed = [
   { id: uid(), name: "Sunita M.", role: "Maintenance Lead", phone: "+91 98765 22222", status: "Active", assigned: 12 },
   { id: uid(), name: "Vikram S.", role: "Landscape Specialist", phone: "+91 98765 33333", status: "On Leave", assigned: 3 }
 ];
-const Route = createFileRoute("/admin/staff")({ component: Page });
+const Route = createFileRoute("/superadmin/staff")({ component: Page });
 function Page() {
   const [items, setItems] = useStore("staff", seed);
   const [open, setOpen] = useState(false);

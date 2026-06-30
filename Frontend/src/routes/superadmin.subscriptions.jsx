@@ -4,7 +4,7 @@ import { PageHeader, Badge, statusTone } from "../components/dashboard/Dashboard
 import { getAllSubscriptions, renewSubscription, updateSubscriptionStatus, resolveSubscriptionUpgrade } from "../api";
 import { toast } from "sonner";
 
-const Route = createFileRoute("/admin/subscriptions")({ component: Page });
+const Route = createFileRoute("/superadmin/subscriptions")({ component: Page });
 
 function mapSubscription(subscription) {
   return {

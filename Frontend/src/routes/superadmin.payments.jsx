@@ -4,7 +4,7 @@ import { PageHeader, Badge, statusTone } from "../components/dashboard/Dashboard
 import { getAllPayments, updatePaymentStatus } from "../api";
 import { toast } from "sonner";
 
-const Route = createFileRoute("/admin/payments")({ component: Page });
+const Route = createFileRoute("/superadmin/payments")({ component: Page });
 
 function mapPayment(payment) {
   return {

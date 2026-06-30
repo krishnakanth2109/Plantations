@@ -23,7 +23,7 @@ function Login() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (ready && user) navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
+    if (ready && user) navigate({ to: (user.role === "superadmin" || user.role === "admin") ? "/superadmin" : "/dashboard" });
   }, [user, ready, navigate]);
 
   async function submit(e) {
@@ -32,7 +32,7 @@ function Login() {
     try {
       const u = await login(email, password);
       toast.success(`Welcome, ${u.name}`);
-      navigate({ to: u.role === "admin" ? "/admin" : "/dashboard" });
+      navigate({ to: (u.role === "superadmin" || u.role === "admin") ? "/superadmin" : "/dashboard" });
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Invalid credentials");
     } finally {

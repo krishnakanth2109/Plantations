@@ -4,7 +4,7 @@ import { PageHeader, Badge, statusTone } from "../components/dashboard/Dashboard
 import { getLeads, updateLeadStatus } from "../api";
 import { toast } from "sonner";
 
-const Route = createFileRoute("/admin/consultations")({ component: Page });
+const Route = createFileRoute("/superadmin/consultations")({ component: Page });
 const statuses = ["New", "Scheduled", "In Progress", "Completed", "Cancelled"];
 const consultationInterests = ["Indoor Plant Styling", "Balcony Makeover", "Landscaping", "Plant Wellness", "Fertilizing", "Partial Maintenance", "Fully Customized Maintenance"];
 

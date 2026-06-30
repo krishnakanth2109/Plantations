@@ -5,7 +5,7 @@ import { getMaintenancePlans, createMaintenancePlan, updateMaintenancePlan, dele
 import { Plus, Trash2, Pencil, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-const Route = createFileRoute("/admin/maintenance-plans")({ component: Page });
+const Route = createFileRoute("/superadmin/maintenance-plans")({ component: Page });
 
 const emptyPlan = {
   name: "",

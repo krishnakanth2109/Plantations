@@ -4,8 +4,8 @@ import { StatCard, PageHeader } from "../components/dashboard/DashboardShell";
 import { getAllBookings, getAllPayments, getAllSubscriptions, getAllWellnessTickets, getLeads } from "../api";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, BarChart, Bar, CartesianGrid, AreaChart, Area } from "recharts";
 import { toast } from "sonner";
-const Route = createFileRoute("/admin/")({
-  component: AdminOverview
+const Route = createFileRoute("/superadmin/")({
+  component: SuperadminOverview
 });
 const monthly = [
   { m: "Dec", revenue: 142e3, bookings: 12 },
@@ -22,7 +22,7 @@ const services = [
   { name: "Wellness", v: 19 },
   { name: "Maintenance", v: 42 }
 ];
-function AdminOverview() {
+function SuperadminOverview() {
   const [bookings, setBookings] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
   const [tickets, setTickets] = useState([]);

@@ -36,20 +36,31 @@ function DashboardShell({ role, nav, title }) {
       navigate({ to: "/login" });
       return;
     }
-    if (user.role !== role) {
-      navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
+    const userRole = user.role;
+    if (userRole !== role && !(role === "superadmin" && userRole === "admin")) {
+      navigate({ to: (userRole === "superadmin" || userRole === "admin") ? "/superadmin" : "/dashboard" });
     }
   }, [user, ready, role, navigate]);
 
-  if (!ready || !user || user.role !== role) {
+  if (!ready || !user || !(user.role === role || (role === "superadmin" && user.role === "admin"))) {
     return <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">Loading…</div>;
   }
-  const groupedNav = nav.reduce((groups, item) => {
+
+  const filteredNav = nav.filter((item) => {
+    if (user?.role === "admin" && item.to === "/superadmin/admins") {
+      return false;
+    }
+    return true;
+  });
+
+  const groupedNav = filteredNav.reduce((groups, item) => {
     const section = item.section || "";
     if (!groups.some((group) => group.section === section)) groups.push({ section, items: [] });
     groups.find((group) => group.section === section).items.push(item);
     return groups;
   }, []);
+
+  const displayTitle = user?.role === "admin" && title === "Super Admin Panel" ? "Admin Panel" : title;
 
   return <div className="flex min-h-screen bg-[#fbf7f1] text-[#1f271f]">
     {
@@ -60,7 +71,7 @@ function DashboardShell({ role, nav, title }) {
         <img src={logo} alt="" className="h-12 w-12 rounded-full border border-white shadow-sm" />
         <div>
           <div className="font-display text-xl text-[#173822]">Yogini Planters</div>
-          <div className="text-[10px] uppercase tracking-[0.28em] text-[#9b8062]">{title}</div>
+          <div className="text-[10px] uppercase tracking-[0.28em] text-[#9b8062]">{displayTitle}</div>
         </div>
       </div>
       <nav className="flex-1 space-y-6 overflow-y-auto px-4 py-5">
@@ -72,7 +83,7 @@ function DashboardShell({ role, nav, title }) {
               </div>
             )}
             {group.items.map((n) => {
-              const active = location.pathname === n.to || n.to !== `/${role === "admin" ? "admin" : "dashboard"}` && location.pathname.startsWith(n.to);
+              const active = location.pathname === n.to || n.to !== `/${role === "superadmin" ? "superadmin" : "dashboard"}` && location.pathname.startsWith(n.to);
               return <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className={`flex items-center justify-between rounded-2xl px-3.5 py-3 text-sm transition ${active ? "bg-primary text-primary-foreground shadow-sm" : "text-[#4b443c] hover:bg-white/70 hover:text-primary"}`}>
                 <span className="flex min-w-0 items-center gap-3">
                   <n.icon className="h-4 w-4 shrink-0" />
@@ -85,13 +96,16 @@ function DashboardShell({ role, nav, title }) {
         ))}
       </nav>
       <div className="border-t border-[#eadfce] p-4">
-        <div className="mb-3 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#173822] text-sm font-medium text-white">{user.name[0]}</div>
+        <Link
+          to={role === "superadmin" ? "/superadmin/profile" : "/dashboard/profile"}
+          className="mb-3 flex items-center gap-3 rounded-2xl p-1.5 hover:bg-white/60 transition-all duration-200 group cursor-pointer"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#173822] text-sm font-medium text-white group-hover:scale-105 transition-transform duration-200">{user.name[0]}</div>
           <div className="min-w-0">
-            <div className="truncate text-sm font-medium">{user.name}</div>
-            <div className="truncate text-xs text-muted-foreground">{user.email}</div>
+            <div className="truncate text-sm font-semibold group-hover:text-primary transition-colors">{user.name}</div>
+            <div className="truncate text-xs text-[#6e6559]">{user.email}</div>
           </div>
-        </div>
+        </Link>
         <button onClick={() => {
           logout();
           navigate({ to: "/" });
@@ -111,7 +125,7 @@ function DashboardShell({ role, nav, title }) {
           <div className="text-[10px] font-semibold uppercase tracking-[0.34em] text-[#a78b6a]">{title}</div>
         </div>
         <div className="flex items-center gap-3">
-          <Link to={role === "admin" ? "/admin/notifications" : "/dashboard/notifications"} className="relative rounded-full border border-[#eadfce] bg-white p-2.5 hover:bg-secondary">
+          <Link to={role === "superadmin" ? "/superadmin/notifications" : "/dashboard/notifications"} className="relative rounded-full border border-[#eadfce] bg-white p-2.5 hover:bg-secondary">
             <Bell className="h-4 w-4" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">

@@ -10,14 +10,14 @@ const router = Router();
 // Create a new notification
 router.post("/", requireAuth, async (req, res, next) => {
   try {
-    const { userId, title, body, type, refId, sendToAdmins } = req.body;
+    const { userId, title, body, type, refId, sendToSuperadmins } = req.body;
 
-    if (sendToAdmins) {
-      const admins = await User.find({ role: "admin" });
+    if (sendToSuperadmins) {
+      const superadmins = await User.find({ role: { $in: ["superadmin", "admin"] }, isActive: { $ne: false } });
       const notifications = await Promise.all(
-        admins.map((admin) =>
+        superadmins.map((superadmin) =>
           Notification.create({
-            userId: admin._id,
+            userId: superadmin._id,
             title,
             body,
             type: type || "system",
@@ -28,9 +28,9 @@ router.post("/", requireAuth, async (req, res, next) => {
 
       if (notifications.length > 0) {
         const io = getIO();
-        if (io) io.to("admin").emit("notification", notifications[0]);
+        if (io) io.to("superadmin").emit("notification", notifications[0]);
       }
-      return res.status(201).json({ message: "Notifications sent to admins", count: notifications.length });
+      return res.status(201).json({ message: "Notifications sent to superadmins", count: notifications.length });
     } else {
       if (!userId) {
         return res.status(400).json({ message: "userId is required" });
@@ -106,7 +106,7 @@ router.delete("/:id", requireAuth, async (req, res, next) => {
     const notification = await Notification.findById(req.params.id);
     if (!notification) return res.status(404).json({ message: "Notification not found" });
 
-    if (notification.userId.toString() !== req.user.id && req.user.role !== "admin") {
+    if (notification.userId.toString() !== req.user.id && req.user.role !== "superadmin") {
       return res.status(403).json({ message: "Unauthorized to delete this notification" });
     }
 

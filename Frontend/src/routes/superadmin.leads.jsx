@@ -5,7 +5,7 @@ import { createLead, getLeads, updateLeadStatus } from "../api";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 
-const Route = createFileRoute("/admin/leads")({ component: Page });
+const Route = createFileRoute("/superadmin/leads")({ component: Page });
 const statuses = ["New", "Contacted", "Follow-up", "Converted", "Lost"];
 
 function Page() {

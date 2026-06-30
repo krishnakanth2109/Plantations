@@ -24,7 +24,7 @@ function Register() {
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   useEffect(() => {
-    if (ready && user) navigate({ to: user.role === "admin" ? "/admin" : "/dashboard" });
+    if (ready && user) navigate({ to: (user.role === "superadmin" || user.role === "admin") ? "/superadmin" : "/dashboard" });
   }, [user, ready, navigate]);
   async function submit(e) {
     e.preventDefault();

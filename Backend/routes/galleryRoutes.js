@@ -13,7 +13,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/admin", requireAuth, requireAdmin, async (req, res, next) => {
+router.get("/superadmin", requireAuth, requireAdmin, async (req, res, next) => {
   try {
     const galleryItems = await GalleryItem.find({}).sort({ sortOrder: 1, createdAt: -1 });
     return res.json({ galleryItems });
