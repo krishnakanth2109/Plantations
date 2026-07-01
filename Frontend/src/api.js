@@ -131,6 +131,12 @@ const toggleAdminStatus = async (id, isActive) => (await api.patch(`/api/superad
 const deleteAdmin = async (id) => (await api.delete(`/api/superadmin/admins/${id}`)).data;
 const updateAdmin = async (id, data) => (await api.put(`/api/superadmin/admins/${id}`, data)).data;
 const updateProfile = async (data) => (await api.put("/api/auth/profile", data)).data;
+
+const getInventory = async () => (await api.get("/api/inventory")).data;
+const createInventoryItem = async (data) => (await api.post("/api/inventory", data)).data;
+const updateInventoryItem = async (id, data) => (await api.put(`/api/inventory/${id}`, data)).data;
+const deleteInventoryItem = async (id) => (await api.delete(`/api/inventory/${id}`)).data;
+
 var stdin_default = api;
 export {
   addWishlistItem,
@@ -209,5 +215,9 @@ export {
   toggleAdminStatus,
   deleteAdmin,
   updateAdmin,
-  updateProfile
+  updateProfile,
+  getInventory,
+  createInventoryItem,
+  updateInventoryItem,
+  deleteInventoryItem
 };

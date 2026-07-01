@@ -11,6 +11,7 @@ import { Route as LoginRoute } from "./routes/login";
 import { Route as MaintenanceRoute } from "./routes/maintenance";
 import { Route as RegisterRoute } from "./routes/register";
 import { Route as ServicesRoute } from "./routes/services";
+import { Route as ProductsRoute } from "./routes/products";
 import { Route as ServicesBalconyRoute } from "./routes/services.balcony";
 import { Route as ServicesIndoorRoute } from "./routes/services.indoor";
 import { Route as ServicesLandscapingRoute } from "./routes/services.landscaping";
@@ -65,6 +66,7 @@ const publicRoutes = [
   MaintenanceRoute,
   RegisterRoute,
   ServicesRoute,
+  ProductsRoute,
   ServicesBalconyRoute,
   ServicesIndoorRoute,
   ServicesLandscapingRoute,

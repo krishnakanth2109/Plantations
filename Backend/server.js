@@ -19,7 +19,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import cmsRoutes from "./routes/cmsRoutes.js";
 import galleryRoutes from "./routes/galleryRoutes.js";
 import superadminRoutes from "./routes/superadminRoutes.js";
-
+import inventoryRoutes from "./routes/inventoryRoutes.js";
 dotenv.config();
 
 const app = express();
@@ -67,6 +67,7 @@ app.use("/api/customers", customerRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/cms", cmsRoutes);
 app.use("/api/gallery", galleryRoutes);
+app.use("/api/inventory", inventoryRoutes);
 app.use("/api/superadmin/admins", superadminRoutes);
 
 app.use((req, res) => {
