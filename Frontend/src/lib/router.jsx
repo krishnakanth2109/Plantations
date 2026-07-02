@@ -13,7 +13,7 @@ function Router({ children }) {
 
 function Link({ to, activeProps, className = "", children, ...props }) {
   const location = RRUseLocation();
-  const href = to === "/" ? "/" : to.replace(/\/+$/, "");
+  const href = to === "/" ? "/" : (to ? to.replace(/\/+$/, "") : "");
   const isActive = location.pathname === href;
   const activeClass = isActive ? activeProps?.className || "" : "";
 

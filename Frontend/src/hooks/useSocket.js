@@ -5,7 +5,7 @@ import { baseURL } from "../api";
 import { toast } from "sonner";
 
 // Extract base URL without the /api suffix (if it exists)
-const socketURL = baseURL.replace(/\/api\/?$/, "");
+const socketURL = (baseURL || "").replace(/\/api\/?$/, "");
 
 let globalSocket = null;
 const listeners = new Set();

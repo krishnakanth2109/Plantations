@@ -1,5 +1,5 @@
 import axios from "axios";
-const baseURL = import.meta.env.MODE === "production" ? import.meta.env.VITE_API_URL_PRODUCTION : import.meta.env.VITE_API_URL_DEVELOPMENT || "http://localhost:5000";
+const baseURL = (import.meta.env.MODE === "production" ? import.meta.env.VITE_API_URL_PRODUCTION : import.meta.env.VITE_API_URL_DEVELOPMENT) || "http://localhost:5000";
 const api = axios.create({
   baseURL,
   timeout: 5e5,
