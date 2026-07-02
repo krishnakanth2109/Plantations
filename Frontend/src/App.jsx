@@ -148,7 +148,7 @@ function App() {
           {/* Dashboard Routes (Nested) */}
           <Route path="/dashboard" element={<DashboardRoute.component />}>
             <Route index element={<DashboardIndexRoute.component />} />
-            {dashboardRoutes.filter(r => r.path !== "/dashboard").map((route) => {
+            {dashboardRoutes.filter(r => r && r.path && r.path !== "/dashboard").map((route) => {
               const Component = route.component;
               const relativePath = route.path.replace(/^\/dashboard\//, "");
               return <Route key={route.path} path={relativePath} element={<Component />} />;
@@ -158,7 +158,7 @@ function App() {
           {/* Admin Routes (Nested) */}
           <Route path="/superadmin" element={<SuperadminRoute.component />}>
             <Route index element={<SuperadminIndexRoute.component />} />
-            {superadminRoutes.filter(r => r.path !== "/superadmin").map((route) => {
+            {superadminRoutes.filter(r => r && r.path && r.path !== "/superadmin").map((route) => {
               const Component = route.component;
               const relativePath = route.path.replace(/^\/superadmin\//, "");
               return <Route key={route.path} path={relativePath} element={<Component />} />;
