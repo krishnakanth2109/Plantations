@@ -12,6 +12,7 @@ function mapTicket(ticket) {
     id: ticket._id || ticket.id,
     customer: ticket.customerId?.name || "",
     issue: ticket.issue,
+    photos: ticket.photos || [],
     status: ticket.status,
     diagnosis: ticket.diagnosis,
     created: ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString("en-IN") : "",
@@ -97,6 +98,15 @@ function Page() {
                 </button>
               </div>
             </div>
+            {t.photos && t.photos.length > 0 && (
+              <div className="mt-4 flex gap-2">
+                {t.photos.map((photo, i) => (
+                  <a key={i} href={photo} target="_blank" rel="noopener noreferrer">
+                    <img src={photo} alt="Ticket issue" className="h-24 w-24 rounded-md object-cover border border-border shadow-sm hover:opacity-80 transition" />
+                  </a>
+                ))}
+              </div>
+            )}
             {t.diagnosis && <p className="mt-3 rounded-lg bg-secondary/60 p-3 text-sm"><strong>Diagnosis:</strong> {t.diagnosis}</p>}
             {t.status !== "Resolved" && (
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">

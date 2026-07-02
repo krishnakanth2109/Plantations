@@ -26,9 +26,9 @@ function Page() {
     async function load() {
       try {
         const data = await getMaintenancePlans();
-        setPlans(data.plans);
+        setPlans(data.plans || []);
       } catch (err) {
-        toast.error(err.message || "Failed to load maintenance plans");
+        toast.error(err.message || "Failed to load plans");
       } finally {
         setLoading(false);
       }
@@ -83,7 +83,7 @@ function Page() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Maintenance Plans"
+        title="Plans"
         subtitle="Manage dynamic plans shown to customers"
         action={
           <button
@@ -167,7 +167,7 @@ function Page() {
           ))}
           {plans.length === 0 && (
             <div className="col-span-full rounded-2xl border border-dashed border-border bg-card p-12 text-center text-muted-foreground">
-              No maintenance plans found. Click Add Plan to create one.
+              No plans found. Click Add Plan to create one.
             </div>
           )}
         </div>

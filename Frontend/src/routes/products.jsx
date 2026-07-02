@@ -1,7 +1,7 @@
 import React from "react";
-import { createFileRoute } from "../lib/router";
+import { createFileRoute, useNavigate } from "../lib/router";
 import { SiteLayout } from "../components/site/SiteLayout";
-import { ShoppingBag, ArrowRight, Loader2 } from "lucide-react";
+import { ShoppingBag, Loader2, MessageCircle } from "lucide-react";
 import { getInventory } from "../api";
 
 const Route = createFileRoute("/products")({
@@ -17,6 +17,7 @@ const Route = createFileRoute("/products")({
 function ProductsPage() {
   const [items, setItems] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     getInventory()
@@ -64,8 +65,11 @@ function ProductsPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                   
                   <div className="absolute bottom-6 left-0 w-full flex justify-center translate-y-8 opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-                    <button className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-sm font-semibold px-6 py-2.5 rounded-full border border-white/30 transition-all flex items-center gap-2 shadow-lg">
-                      Add to Cart <ArrowRight className="h-4 w-4" />
+                    <button 
+                      onClick={() => navigate("/contact")}
+                      className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white text-sm font-semibold px-6 py-2.5 rounded-full border border-white/30 transition-all flex items-center gap-2 shadow-lg"
+                    >
+                      Enquire Now <MessageCircle className="h-4 w-4" />
                     </button>
                   </div>
                 </div>

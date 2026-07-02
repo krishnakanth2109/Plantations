@@ -9,7 +9,7 @@ const nav = [
   { to: "/superadmin/consultations", label: "Consultations", icon: CalendarCheck },
   { to: "/superadmin/bookings", label: "Bookings", icon: ClipboardList },
   { to: "/superadmin/subscriptions", label: "Subscriptions", icon: Repeat },
-  { to: "/superadmin/maintenance-plans", label: "Maintenance Plans", icon: ClipboardList },
+  { to: "/superadmin/maintenance-plans", label: "Plans", icon: ClipboardList },
   { to: "/superadmin/wellness", label: "Plant Wellness", icon: Stethoscope },
   { to: "/superadmin/projects", label: "Projects", icon: FolderKanban },
 //  { to: "/superadmin/staff", label: "Staff", icon: UsersRound },

@@ -39,7 +39,7 @@ function Register() {
       setSubmitting(false);
     }
   }
-  return <div className="min-h-screen bg-leaf-pattern bg-background px-4 py-10">
+  return <div className="min-h-screen px-4 py-10">
       <div className="mx-auto grid min-h-[calc(100vh-5rem)] w-full max-w-6xl items-center gap-10 lg:grid-cols-[1fr_0.9fr]">
         <section className="hidden lg:block">
           <div className="max-w-xl">

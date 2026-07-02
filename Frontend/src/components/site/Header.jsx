@@ -47,15 +47,15 @@ function Header() {
             </Link>
           ))}
           
-          {/* Shop Mega Menu */}
+          {/* Products Link */}
           <div className="group flex h-full items-center">
-            <button className="relative flex h-full items-center gap-1 text-sm font-medium text-foreground/80 transition-colors hover:text-primary group-hover:text-primary">
-              Shop <ChevronDown className="h-4 w-4 transition-transform duration-300 group-hover:rotate-180" />
+            <Link to="/products" className="relative flex h-full items-center gap-1 text-sm font-medium text-foreground/80 transition-colors hover:text-primary group-hover:text-primary" activeProps={{ className: "text-primary" }}>
+              Products
               <span className="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100" />
-            </button>
+            </Link>
             
             {/* Dropdown Container */}
-            <div className="absolute left-1/2 top-full -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 w-max z-50">
+            {/* <div className="absolute left-1/2 top-full -translate-x-1/2 pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0 w-max z-50">
               <div className="w-[850px] rounded-3xl border border-white/20 bg-background/95 p-8 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] backdrop-blur-2xl ring-1 ring-black/5 dark:ring-white/10">
                 <div className="flex items-end justify-between mb-8 pb-4 border-b border-border/50">
                   <div>
@@ -102,7 +102,7 @@ function Header() {
                   ))}
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {navRight.map((n) => (

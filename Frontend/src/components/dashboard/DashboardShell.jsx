@@ -62,7 +62,7 @@ function DashboardShell({ role, nav, title }) {
 
   const displayTitle = user?.role === "admin" && title === "Super Admin Panel" ? "Admin Panel" : title;
 
-  return <div className="flex min-h-screen bg-[#fbf7f1] text-[#1f271f]">
+  return <div className="flex min-h-screen bg-transparent text-[#1f271f]">
     {
       /* Sidebar */
     }

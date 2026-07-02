@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { createFileRoute } from "../lib/router";
+import { createFileRoute, useNavigate } from "../lib/router";
 import { PageHeader } from "../components/dashboard/DashboardShell";
 import { Bell, Trash2 } from "lucide-react";
 import { getMyNotifications, markAllNotificationsRead, markNotificationRead, deleteNotification } from "../api";
@@ -11,6 +11,31 @@ const Route = createFileRoute("/superadmin/notifications")({ component: Page });
 function Page() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  const getNotificationLink = (type) => {
+    switch (type) {
+      case "booking": return "/superadmin/bookings";
+      case "subscription": return "/superadmin/subscriptions";
+      case "payment": return "/superadmin/payments";
+      case "wellness": return "/superadmin/wellness";
+      default: return null;
+    }
+  };
+
+  const handleNotificationClick = (n) => {
+    const id = n._id || n.id;
+    if (deletingId === id) return;
+    
+    if (!n.read) {
+      markSingleRead(id);
+    }
+    
+    const link = getNotificationLink(n.type);
+    if (link) {
+      navigate(link);
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -101,7 +126,7 @@ function Page() {
             return (
               <div
                 key={id}
-                onClick={() => !n.read && !isDeleting && markSingleRead(id)}
+                onClick={() => handleNotificationClick(n)}
                 className={`flex items-start gap-4 rounded-2xl border p-5 transition ${
                   isDeleting 
                     ? "border-rose-500/20 bg-rose-500/5 cursor-default" 

@@ -90,6 +90,7 @@ const updateLibraryArticle = async (id, data) => (await api.put(`/api/library/${
 const deleteLibraryArticle = async (id) => (await api.delete(`/api/library/${id}`)).data;
 const getWishlist = async () => (await api.get("/api/wishlist")).data;
 const addWishlistItem = async (serviceId) => (await api.post("/api/wishlist", { serviceId })).data;
+const addProductToWishlist = async (productId) => (await api.post("/api/wishlist", { productId })).data;
 const removeWishlistItem = async (serviceId) => (await api.delete(`/api/wishlist/${serviceId}`)).data;
 const createLead = async (data) => (await api.post("/api/leads", data)).data;
 const getLeads = async () => (await api.get("/api/leads")).data;
@@ -140,6 +141,7 @@ const deleteInventoryItem = async (id) => (await api.delete(`/api/inventory/${id
 var stdin_default = api;
 export {
   addWishlistItem,
+  addProductToWishlist,
   approveReview,
   baseURL,
   cancelBooking,

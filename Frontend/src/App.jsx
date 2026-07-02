@@ -132,37 +132,45 @@ function NotFound() {
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* Public Routes */}
-        {publicRoutes.map((route) => {
-          const Component = route.component;
-          return <Route key={route.path} path={route.path} element={<Component />} />;
-        })}
+      <div className="relative min-h-screen w-full">
+        <div 
+          className="fixed inset-0 z-[-1] opacity-300 pointer-events-none bg-repeat bg-[length:500px]"
+          style={{ backgroundImage: "url('/rose_watermark.png')" }}
+        />
+        <div className="relative z-0">
+          <Routes>
+            {/* Public Routes */}
+            {publicRoutes.map((route) => {
+              const Component = route.component;
+              return <Route key={route.path} path={route.path} element={<Component />} />;
+            })}
 
-        {/* Dashboard Routes (Nested) */}
-        <Route path="/dashboard" element={<DashboardRoute.component />}>
-          <Route index element={<DashboardIndexRoute.component />} />
-          {dashboardRoutes.filter(r => r.path !== "/dashboard").map((route) => {
-            const Component = route.component;
-            const relativePath = route.path.replace(/^\/dashboard\//, "");
-            return <Route key={route.path} path={relativePath} element={<Component />} />;
-          })}
-        </Route>
+          {/* Dashboard Routes (Nested) */}
+          <Route path="/dashboard" element={<DashboardRoute.component />}>
+            <Route index element={<DashboardIndexRoute.component />} />
+            {dashboardRoutes.filter(r => r.path !== "/dashboard").map((route) => {
+              const Component = route.component;
+              const relativePath = route.path.replace(/^\/dashboard\//, "");
+              return <Route key={route.path} path={relativePath} element={<Component />} />;
+            })}
+          </Route>
 
-        {/* Admin Routes (Nested) */}
-        <Route path="/superadmin" element={<SuperadminRoute.component />}>
-          <Route index element={<SuperadminIndexRoute.component />} />
-          {superadminRoutes.filter(r => r.path !== "/superadmin").map((route) => {
-            const Component = route.component;
-            const relativePath = route.path.replace(/^\/superadmin\//, "");
-            return <Route key={route.path} path={relativePath} element={<Component />} />;
-          })}
-        </Route>
+          {/* Admin Routes (Nested) */}
+          <Route path="/superadmin" element={<SuperadminRoute.component />}>
+            <Route index element={<SuperadminIndexRoute.component />} />
+            {superadminRoutes.filter(r => r.path !== "/superadmin").map((route) => {
+              const Component = route.component;
+              const relativePath = route.path.replace(/^\/superadmin\//, "");
+              return <Route key={route.path} path={relativePath} element={<Component />} />;
+            })}
+          </Route>
 
-        {/* 404 Route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster richColors position="top-right" />
+          {/* 404 Route */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster richColors position="top-right" />
+        </div>
+      </div>
     </Router>
   );
 }

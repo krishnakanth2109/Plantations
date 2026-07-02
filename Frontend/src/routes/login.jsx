@@ -55,7 +55,7 @@ function Login() {
     }
   }
 
-  return <div className="flex min-h-screen items-center justify-center bg-leaf-pattern bg-background px-4">
+  return <div className="flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-xl animate-in fade-in zoom-in duration-300">
         <div className="flex flex-col items-center text-center">
           <img src={logo} alt="" className="h-16 w-16 rounded-full" />
