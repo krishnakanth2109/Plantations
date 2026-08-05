@@ -1,9 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { createFileRoute } from "../lib/router";
 import { PageHeader, Badge, statusTone } from "../components/dashboard/DashboardShell";
+import { LoadingCircle } from "../components/ui/LoadingCircle";
 import { getMySubscriptions, getMaintenancePlans, createSubscription } from "../api";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+
+import { ClipboardCheck, ShieldCheck, Leaf, } from "lucide-react";
+
+const iconMap = { ClipboardCheck, ShieldCheck, Leaf, };
 
 const Route = createFileRoute("/dashboard/maintenance")({ component: Page });
 
@@ -53,6 +58,7 @@ function Page() {
     try {
       const data = await getMaintenancePlans();
       setPlans(data.plans.filter(p => p.isActive));
+      console.log(data);
     } catch (err) {
       toast.error(err.message || "Failed to load plans");
     } finally {
@@ -70,7 +76,7 @@ function Page() {
 
   async function subscribe(planDoc) {
     const id = planDoc._id || planDoc.id;
-    
+
     // Check if there is an active subscription
     const activeSub = items.find((s) => s.status === "Active" || s.status === "Pending");
     if (activeSub) {
@@ -188,8 +194,7 @@ function Page() {
 
             {plansLoading ? (
               <div className="flex h-48 items-center justify-center text-muted-foreground">
-                <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                Loading plans...
+                <LoadingCircle size="md" label="Loading plans..." />
               </div>
             ) : (
               <div className="mt-6 grid gap-6 md:grid-cols-2">
@@ -197,23 +202,41 @@ function Page() {
                   const id = p._id || p.id;
                   const activeSub = items.find((s) => s.status === "Active" || s.status === "Pending");
                   const isCurrentPlan = activeSub?.plan === p.name;
-                  
+                  const Icon = iconMap[p.icon] || Leaf;
+
                   return (
-                    <div key={id} className={`rounded-2xl border p-5 flex flex-col justify-between transition ${
-                      isCurrentPlan ? "border-amber-500/30 bg-amber-500/5 shadow-sm" : "border-border bg-secondary/20"
-                    }`}>
+                    <div
+                      key={id}
+                      className={`rounded-2xl border p-5 flex flex-col justify-between transition ${isCurrentPlan
+                        ? "border-amber-500/30 bg-amber-500/5 shadow-sm"
+                        : "border-border bg-secondary/20"
+                        }`}
+                    >
                       <div>
                         <div className="flex items-start justify-between">
-                          <h4 className="font-display text-lg text-primary">{p.name} Maintenance</h4>
+                          {/* Left Side */}
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                              <Icon className="h-5 w-5" />
+                            </div>
+
+                            <h4 className="font-display text-lg text-primary">
+                              {p.name} Maintenance
+                            </h4>
+                          </div>
+
+                          {/* Right Side */}
                           {isCurrentPlan && (
                             <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-800 border border-amber-500/20">
                               Active
                             </span>
                           )}
                         </div>
+
                         <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
                           {p.description}
                         </p>
+
                         <ul className="mt-4 space-y-1.5 text-xs text-slate-600">
                           {p.features?.map((f, i) => (
                             <li key={i} className="flex gap-1.5 items-start">
@@ -222,16 +245,23 @@ function Page() {
                           ))}
                         </ul>
                       </div>
+
                       <div className="mt-5 border-t border-border pt-4">
                         {isCurrentPlan ? (
                           <div className="mb-3 rounded-xl bg-amber-500/10 border border-amber-500/20 p-2.5 text-[10px] text-amber-800 flex gap-2 items-center leading-normal">
                             <span>⚠️</span>
-                            <span>This is your current active plan. Re-booking will reset your billing start date.</span>
+                            <span>
+                              This is your current active plan. Re-booking will reset your
+                              billing start date.
+                            </span>
                           </div>
                         ) : activeSub ? (
                           <div className="mb-3 rounded-xl bg-primary/10 border border-primary/20 p-2.5 text-[10px] text-primary flex gap-2 items-center leading-normal">
                             <span>✨</span>
-                            <span>Selecting this will upgrade your current {activeSub.plan} plan coverage.</span>
+                            <span>
+                              Selecting this will upgrade your current {activeSub.plan} plan
+                              coverage.
+                            </span>
                           </div>
                         ) : null}
 
@@ -240,22 +270,22 @@ function Page() {
                             {p.priceNote}
                           </p>
                         )}
+
                         <button
                           onClick={() => subscribe(p)}
                           disabled={submittingPlan === id}
-                          className={`w-full py-2 px-3 rounded-full text-xs font-semibold disabled:opacity-60 cursor-pointer transition ${
-                            isCurrentPlan 
-                              ? "bg-amber-600 hover:bg-amber-700 text-white" 
-                              : "bg-primary hover:bg-primary/95 text-primary-foreground"
-                          }`}
+                          className={`w-full py-2 px-3 rounded-full text-xs font-semibold disabled:opacity-60 cursor-pointer transition ${isCurrentPlan
+                            ? "bg-amber-600 hover:bg-amber-700 text-white"
+                            : "bg-primary hover:bg-primary/95 text-primary-foreground"
+                            }`}
                         >
-                          {submittingPlan === id 
-                            ? "Requesting..." 
-                            : isCurrentPlan 
-                            ? "Renew / Re-book Plan" 
-                            : activeSub 
-                            ? "Upgrade to this Plan" 
-                            : "Book this plan"}
+                          {submittingPlan === id
+                            ? "Requesting..."
+                            : isCurrentPlan
+                              ? "Renew / Re-book Plan"
+                              : activeSub
+                                ? "Upgrade to this Plan"
+                                : "Book this plan"}
                         </button>
                       </div>
                     </div>
@@ -276,15 +306,15 @@ function Page() {
                 ⚠️
               </div>
               <h3 className="mt-4 font-display text-xl text-primary">
-                {confirmModal.isSame 
-                  ? "Re-book Current Plan?" 
+                {confirmModal.isSame
+                  ? "Re-book Current Plan?"
                   : confirmModal.planDoc.name === "Fully Customized"
-                  ? "Upgrade Plan Coverage?" 
-                  : "Change Plan Coverage?"}
+                    ? "Upgrade Plan Coverage?"
+                    : "Change Plan Coverage?"}
               </h3>
               <p className="mt-3 text-xs text-muted-foreground leading-relaxed">
-                {confirmModal.isSame 
-                  ? `You already have an active subscription to the ${confirmModal.planDoc.name} Plan. Re-booking will overwrite your current configuration.` 
+                {confirmModal.isSame
+                  ? `You already have an active subscription to the ${confirmModal.planDoc.name} Plan. Re-booking will overwrite your current configuration.`
                   : `You are requesting to change your plant wellness plan from the ${confirmModal.activePlan} Plan to the ${confirmModal.planDoc.name} Plan. This requires admin approval. Your current plan will remain active until reviewed.`}
               </p>
               <div className="mt-6 flex gap-3">

@@ -14,8 +14,9 @@ import { Route as ServicesRoute } from "./routes/services";
 import { Route as ProductsRoute } from "./routes/products";
 import { Route as ServicesBalconyRoute } from "./routes/services.balcony";
 import { Route as ServicesIndoorRoute } from "./routes/services.indoor";
-import { Route as ServicesLandscapingRoute } from "./routes/services.landscaping";
+import { Route as ServicesMossArtsTerrariumsRoute } from "./routes/services.moss-arts-terrariums";
 import { Route as ServicesWellnessRoute } from "./routes/services.wellness";
+import { Route as ServicesFertilizingRoute } from "./routes/services.fertilizing";
 
 import { Route as DashboardRoute } from "./routes/dashboard";
 import { Route as DashboardIndexRoute } from "./routes/dashboard.index";
@@ -69,8 +70,9 @@ const publicRoutes = [
   ProductsRoute,
   ServicesBalconyRoute,
   ServicesIndoorRoute,
-  ServicesLandscapingRoute,
+  ServicesMossArtsTerrariumsRoute,
   ServicesWellnessRoute,
+  ServicesFertilizingRoute,
 ];
 
 const dashboardRoutes = [
@@ -133,7 +135,7 @@ function App() {
   return (
     <Router>
       <div className="relative min-h-screen w-full">
-        <div 
+        <div
           className="fixed inset-0 z-[-1] opacity-300 pointer-events-none bg-repeat bg-[length:500px]"
           style={{ backgroundImage: "url('/rose_watermark.png')" }}
         />
@@ -145,30 +147,30 @@ function App() {
               return <Route key={route.path} path={route.path} element={<Component />} />;
             })}
 
-          {/* Dashboard Routes (Nested) */}
-          <Route path="/dashboard" element={<DashboardRoute.component />}>
-            <Route index element={<DashboardIndexRoute.component />} />
-            {dashboardRoutes.filter(r => r && r.path && r.path !== "/dashboard").map((route) => {
-              const Component = route.component;
-              const relativePath = route.path.replace(/^\/dashboard\//, "");
-              return <Route key={route.path} path={relativePath} element={<Component />} />;
-            })}
-          </Route>
+            {/* Dashboard Routes (Nested) */}
+            <Route path="/dashboard" element={<DashboardRoute.component />}>
+              <Route index element={<DashboardIndexRoute.component />} />
+              {dashboardRoutes.filter(r => r && r.path && r.path !== "/dashboard").map((route) => {
+                const Component = route.component;
+                const relativePath = route.path.replace(/^\/dashboard\//, "");
+                return <Route key={route.path} path={relativePath} element={<Component />} />;
+              })}
+            </Route>
 
-          {/* Admin Routes (Nested) */}
-          <Route path="/superadmin" element={<SuperadminRoute.component />}>
-            <Route index element={<SuperadminIndexRoute.component />} />
-            {superadminRoutes.filter(r => r && r.path && r.path !== "/superadmin").map((route) => {
-              const Component = route.component;
-              const relativePath = route.path.replace(/^\/superadmin\//, "");
-              return <Route key={route.path} path={relativePath} element={<Component />} />;
-            })}
-          </Route>
+            {/* Admin Routes (Nested) */}
+            <Route path="/superadmin" element={<SuperadminRoute.component />}>
+              <Route index element={<SuperadminIndexRoute.component />} />
+              {superadminRoutes.filter(r => r && r.path && r.path !== "/superadmin").map((route) => {
+                const Component = route.component;
+                const relativePath = route.path.replace(/^\/superadmin\//, "");
+                return <Route key={route.path} path={relativePath} element={<Component />} />;
+              })}
+            </Route>
 
-          {/* 404 Route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster richColors position="top-right" />
+            {/* 404 Route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster richColors position="top-right" />
         </div>
       </div>
     </Router>

@@ -7,8 +7,23 @@ import {
   useNavigate as RRUseNavigate,
 } from "react-router-dom";
 
+function ScrollToTop() {
+  const { pathname } = RRUseLocation();
+
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function Router({ children }) {
-  return <BrowserRouter>{children}</BrowserRouter>;
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      {children}
+    </BrowserRouter>
+  );
 }
 
 function Link({ to, activeProps, className = "", children, ...props }) {
