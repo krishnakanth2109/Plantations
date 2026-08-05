@@ -47,7 +47,7 @@ const Route = createFileRoute("/")({
   component: Index
 });
 
-const serviceChapters = [
+export const serviceChapters = [
   {
     id: "01",
     chapter: "Chapter I",
@@ -343,91 +343,7 @@ function Index() {
       </section>
 
       {/* ACT IV: THE FOUR CHAPTERS OF BOTANICAL CRAFT (SERVICES) */}
-      <section className="bg-muted/20 py-24 sm:py-36 border-b border-border/40">
-        <div className="mx-auto max-w-7xl px-6 sm:px-12 lg:px-16">
-          <div className="text-center max-w-3xl mx-auto mb-20 sm:mb-28">
-            <span className="text-xs font-semibold uppercase tracking-widest text-primary bg-primary/10 px-4 py-1.5 rounded-full inline-block">
-              Our Craft
-            </span>
-            <h2 className="mt-4 font-display text-4xl sm:text-6xl font-bold tracking-tight text-primary">
-              Specialized Services
-            </h2>
-            <p className="mt-4 text-base sm:text-xl text-muted-foreground leading-relaxed">
-              Explore our decoration, landscaping, and maintenance offerings tailored for residences, corporate offices, and commercial venues.
-            </p>
-          </div>
-
-          <div className="space-y-24 sm:space-y-36">
-            {serviceChapters.map((story, idx) => {
-              const isEven = idx % 2 === 0;
-              return (
-                <div
-                  key={story.id}
-                  className={`flex flex-col ${isEven ? "lg:flex-row" : "lg:flex-row-reverse"} items-center gap-12 lg:gap-20`}
-                >
-                  {/* Image Hero */}
-                  <div className="w-full lg:w-1/2">
-                    <div className="group relative aspect-[16/11] overflow-hidden rounded-[36px] border border-border/40 shadow-xl bg-card">
-                      {story.img.endsWith('.mp4') ? (
-                        <video
-                          src={story.img}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <img
-                          src={story.img}
-                          alt={story.title}
-                          loading="lazy"
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      )}
-                      <div className="absolute top-6 left-6 bg-black/40 border border-white/20 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full">
-                        {story.tag}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Content Details */}
-                  <div className="w-full lg:w-1/2 space-y-6">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-md">{story.chapter}</span>
-                    </div>
-                    <h3 className="font-display text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-                      {story.title}
-                    </h3>
-                    <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                      {story.desc}
-                    </p>
-
-                    <div className="space-y-3 pt-2">
-                      {story.highlights.map((h, i) => (
-                        <div key={i} className="flex items-center gap-3 text-sm font-semibold text-foreground">
-                          <div className="h-2 w-2 rounded-full bg-primary shrink-0" />
-                          <span>{h}</span>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="pt-4">
-                      <Link
-                        to={story.to}
-                        className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline group"
-                      >
-                        <span>Explore {story.title}</span>
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+    
 
       {/* ACT V: THE FOUR PILLARS OF YOGINI EXCELLENCE */}
       <section className="bg-[#F9F6F2] py-24 sm:py-36 border-b border-border/40">

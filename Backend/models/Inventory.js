@@ -7,11 +7,6 @@ const inventorySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    category: {
-      type: String,
-      enum: ["Plant", "Pot", "Care", "Tools", "Decor"],
-      required: true,
-    },
     stock: {
       type: Number,
       default: 0,
@@ -27,9 +22,9 @@ const inventorySchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    image: {
-      type: String,
-      default: "",
+    images: {
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true }
